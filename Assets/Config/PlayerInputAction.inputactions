@@ -1,0 +1,34 @@
+{
+    "name": "PlayerInputAction",
+    "maps": [
+        {
+            "name": "Player",
+            "id": "1a4d9013-0c10-4f78-9b4b-f8c62dbceea0",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Value",
+                    "id": "1eb77d5b-d3ac-41cd-be44-1e8d60122eca",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "dea7d4ce-a0e1-42fe-84a2-48dd8d384102",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
