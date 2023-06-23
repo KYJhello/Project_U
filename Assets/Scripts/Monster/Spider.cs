@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public class Spider : Monster
 {
@@ -22,7 +23,7 @@ public class Spider : Monster
     private NavMeshAgent agent;
 
     //private List<Vector3> patrolPoints;
-    private int patrolIdx;
+    //private int patrolIdx;
     protected override void Awake()
     {
         base.Awake();
@@ -126,7 +127,7 @@ public class Spider : Monster
 
         public override void Enter()
         {
-            owner.patrolIdx = 0;
+            //owner.patrolIdx = 0;
             //PatrolCoroutine = owner.StartCoroutine(PatrolMove());
         }
 
@@ -172,6 +173,10 @@ public class Spider : Monster
         private float speed;
         private float detectRange;
         private float attackRange;
+
+        Coroutine lookroutine;
+        Coroutine tracingroutine;
+
         public TraceState(Spider owner, StateMachine<State, Spider> stateMachine) : base(owner, stateMachine)
         {
 
@@ -179,13 +184,16 @@ public class Spider : Monster
 
         public override void Enter()
         {
-            owner.StartCoroutine(LookAtRoutine());
-            owner.StartCoroutine(TraceRoutine());
+            animator.SetBool("Trace", true);
+            lookroutine =  owner.StartCoroutine(owner.LookAtRoutine());
+            tracingroutine =  owner.StartCoroutine(owner.TraceRoutine());
         }
 
         public override void Exit()
         {
-            owner.StopAllCoroutines();
+            owner.StopCoroutine(lookroutine);
+            owner.StopCoroutine(tracingroutine);
+            animator.SetBool("Trace", false);
         }
 
         public override void Setup()
@@ -198,11 +206,11 @@ public class Spider : Monster
 
         public override void Transition()
         {
-            if((target.position - tranform.position).sqrMagnitude > detectRange + 5f )
+            if ((target.position - tranform.position).sqrMagnitude > detectRange + Mathf.Sqrt(detectRange)*2f)
             {
                 stateMachine.ChangeState(State.Returning);
             }
-            else if((target.position - tranform.position).sqrMagnitude < attackRange)
+            else if ((target.position - tranform.position).sqrMagnitude < attackRange)
             {
                 stateMachine.ChangeState(State.Attack);
             }
@@ -212,22 +220,7 @@ public class Spider : Monster
         {
             owner.agent.destination = target.position;
         }
-        IEnumerator LookAtRoutine()
-        {
-            while (true)
-            {
-                owner.moveDir = (target.position - tranform.position).normalized;
-                owner.transform.rotation = Quaternion.Lerp(tranform.rotation, Quaternion.LookRotation(owner.moveDir), 0.1f);
-                yield return null;
-            }
-        }
-        IEnumerator TraceRoutine()
-        {
-            while (true)
-            {
-                owner.transform.Translate(owner.moveDir * Time.deltaTime * speed);
-            }
-        }
+        
     }
     // idle(페트롤[0]) 위치로 돌아감
     private class ReturningState : SpiderState
@@ -341,7 +334,23 @@ public class Spider : Monster
         {
         }
     }
-
+    IEnumerator LookAtRoutine()
+    {
+        while (true)
+        {
+            moveDir = (target.position - transform.position).normalized;
+            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(moveDir), 0.1f);
+            yield return null;
+        }
+    }
+    IEnumerator TraceRoutine()
+    {
+        while (true)
+        {
+            transform.Translate(moveDir * Time.deltaTime * moveSpeed);
+            yield return null;
+        }
+    }
 
     #endregion State 끝
 }

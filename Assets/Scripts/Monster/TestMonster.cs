@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.AI;
 
-public class TestMonster : NonHumanMonster
+public class TestMonster : NonHumanMonster, IHittable
 {
     private Transform player;
     private Vector3 moveDir;
@@ -31,6 +31,10 @@ public class TestMonster : NonHumanMonster
         {
             Destroy(gameObject);
         }
+    }
+    public void TakeHit(int damage)
+    {
+        HP -= damage;
     }
 
     protected override void Attack()

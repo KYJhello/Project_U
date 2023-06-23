@@ -11,12 +11,15 @@ public class PlayerAttacker : PlayerData
     // smg, 라이플, ar = 레이케스트
     // 샷건, 칼 = OverlapSphere
     // 최적화 위해 총알은 파티클 시스템 사용?
-    [SerializeField] WeaponBase CurWeapon;
+    [SerializeField] WeaponBase curWeapon;
+    [SerializeField] LayerMask targetMask;
+    [SerializeField] LayerMask obstacleMask;
     private float cosResult;
+
 
     private void Awake()
     {
-        cosResult = Mathf.Cos(CurWeapon.Angle * 0.5f * Mathf.Deg2Rad);
+        cosResult = Mathf.Cos(curWeapon.Angle * 0.5f * Mathf.Deg2Rad);
     }
 
     private void OnAttack(InputValue value)
@@ -26,9 +29,9 @@ public class PlayerAttacker : PlayerData
     private void Attack()
     {
         // 1. 나이프인경우
-        if(CurWeapon.GetWeaponType == WeaponType.Knife)
+        if(curWeapon.GetWeaponType == WeaponType.Knife)
         {
-            Collider[] colliders = Physics.OverlapSphere(transform.position, CurWeapon.Range);
+            Collider[] colliders = Physics.OverlapSphere(transform.position, curWeapon.Range, targetMask);
             foreach (Collider collider in colliders)
             {
                 //2. 앞에 있는지
@@ -40,21 +43,26 @@ public class PlayerAttacker : PlayerData
                 else
                 {
                     IHittable hittable = collider.GetComponent<IHittable>();
-                    hittable?.TakeHit(CurATK + CurWeapon.Damage);
+                    hittable?.TakeHit(CurATK + curWeapon.Damage);
                 }
             }
 
         }
         // 2. Angle이 1인 총기의 경우 레이케스트 사용
-        else if (CurWeapon.Angle == 1)
+        else if (curWeapon.Angle == 1)
         {
-            
+            RaycastHit hit;
+            if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, curWeapon.Range))
+            {
+                IHittable target = hit.transform.GetComponent<IHittable>();
+                target?.TakeHit(CurATK + curWeapon.Damage);
+            }
         }
         // 3. 샷건용
         else
         {
             // 1. 범위 안에 있는지
-            Collider[] colliders = Physics.OverlapSphere(transform.position, CurWeapon.Range);
+            Collider[] colliders = Physics.OverlapSphere(transform.position, curWeapon.Range, targetMask);
             foreach (Collider collider in colliders)
             {
                 //2. 앞에 있는지
@@ -66,7 +74,7 @@ public class PlayerAttacker : PlayerData
                 else
                 {
                     IHittable hittable = collider.GetComponent<IHittable>();
-                    hittable?.TakeHit(CurATK + CurWeapon.Damage);
+                    hittable?.TakeHit(CurATK + curWeapon.Damage);
                 }
             }
         }
@@ -76,13 +84,13 @@ public class PlayerAttacker : PlayerData
         if (!debug) return;
 
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, CurWeapon.Range);
+        Gizmos.DrawWireSphere(transform.position, curWeapon.Range);
 
-        Vector3 rightDir = AngleToDir(transform.eulerAngles.y + CurWeapon.Angle * 0.5f);
-        Vector3 leftDir = AngleToDir(transform.eulerAngles.y - CurWeapon.Angle * 0.5f);
+        Vector3 rightDir = AngleToDir(transform.eulerAngles.y + curWeapon.Angle * 0.5f);
+        Vector3 leftDir = AngleToDir(transform.eulerAngles.y - curWeapon.Angle * 0.5f);
 
-        UnityEngine.Debug.DrawRay(transform.position, rightDir * CurWeapon.Range, Color.yellow);
-        UnityEngine.Debug.DrawRay(transform.position, leftDir * CurWeapon.Range, Color.yellow);
+        UnityEngine.Debug.DrawRay(transform.position, rightDir * curWeapon.Range, Color.yellow);
+        UnityEngine.Debug.DrawRay(transform.position, leftDir * curWeapon.Range, Color.yellow);
     }
     private Vector3 AngleToDir(float angle)
     {
