@@ -3,24 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerMover : MonoBehaviour
+public class PlayerMover : PlayerData
 {
-    [SerializeField] private float walkSpeed;
-    [SerializeField] private float runSpeed;
-    [SerializeField] private float jumpSpeed;
-
     private CharacterController controller;
     Vector3 moveDir;
-    private float ySpeed = 0;
+    private float ySpeed = 0; // 앞 뒤
+    private float zSpeed = 0; // 위 아래
 
-    private float moveSpeed;
+
     private bool isRun;
-    private Animator animator;
+    private bool isSit;
+
 
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
-        animator = GetComponent<Animator>();
     }
     private void Update()
     {
@@ -34,6 +31,10 @@ public class PlayerMover : MonoBehaviour
         if (moveDir.magnitude == 0)  // 안움직임
         {
             moveSpeed = Mathf.Lerp(moveSpeed, 0, 0.5f); // 선형 보간
+        }
+        else if(isSit)      // 앉음
+        {
+            moveSpeed = Mathf.Lerp(moveSpeed, crouchSpeed, 0.5f);
         }
         else if (isRun)       // 뜀  
         {
@@ -63,27 +64,46 @@ public class PlayerMover : MonoBehaviour
     {
         isRun = value.isPressed;
     }
+    private void OnSit(InputValue value)
+    {
+        if (isSit) { isSit = false; }
+        else { isSit = true; }
+
+        animator.SetBool("Sit", isSit);
+    }
 
     private void Jump()
     {
-        ySpeed += Physics.gravity.y * Time.deltaTime;
+        zSpeed += Physics.gravity.y * Time.deltaTime;
 
         // 바닥에 있고 하강중이라면
-        if (IsGrounded() && ySpeed < 0)
+        if (IsGrounded() && zSpeed < 0)
         {
-            ySpeed = -1;
+            zSpeed = -1;
             animator.SetBool("IsJump", false);
+            animator.SetBool("IsFloat", false);
+        }
+        else if (!IsGrounded() && IsFloat() && zSpeed < -3 && zSpeed > -5) {
+            animator.SetTrigger("Floating");
+            animator.SetBool("IsFloat", true);
         }
 
-        controller.Move(Vector3.up * ySpeed * Time.deltaTime);
+        animator.SetFloat("ZSpeed", zSpeed);
+        controller.Move(Vector3.up * zSpeed * Time.deltaTime);
     }
     private void OnJump(InputValue value)
     {
         if (IsGrounded())
         {
             animator.SetBool("IsJump", true);
-            ySpeed = jumpSpeed;
+            animator.SetTrigger("JumpStart");
+            zSpeed = jumpSpeed;
         }
+    }
+    private bool IsFloat()
+    {
+        RaycastHit hit;
+        return !Physics.Raycast(transform.position, Vector3.down, out hit, 3f);
     }
 
     private bool IsGrounded()
