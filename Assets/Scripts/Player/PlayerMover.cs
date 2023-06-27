@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerMover : PlayerData
+public class PlayerMover : MonoBehaviour
 {
+    private PlayerData data;
     private CharacterController controller;
     Vector3 moveDir;
     private float ySpeed = 0; // 앞 뒤
     private float zSpeed = 0; // 위 아래
-
 
     private bool isRun;
     private bool isSit;
@@ -17,6 +17,7 @@ public class PlayerMover : PlayerData
 
     private void Awake()
     {
+        data = GetComponent<PlayerData>();
         controller = GetComponent<CharacterController>();
     }
     private void Update()
@@ -30,29 +31,29 @@ public class PlayerMover : PlayerData
         // 안움직임
         if (moveDir.magnitude == 0)  // 안움직임
         {
-            moveSpeed = Mathf.Lerp(moveSpeed, 0, 0.5f); // 선형 보간
+            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, 0, 0.5f); // 선형 보간
         }
         else if(isSit)      // 앉음
         {
-            moveSpeed = Mathf.Lerp(moveSpeed, crouchSpeed, 0.5f);
+            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.CrouchSpeed, 0.5f);
         }
         else if (isRun)       // 뜀  
         {
-            moveSpeed = Mathf.Lerp(moveSpeed, runSpeed, 0.5f);
+            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.RunSpeed, 0.5f);
         }
         else                   // 걸음     
         {
-            moveSpeed = Mathf.Lerp(moveSpeed, walkSpeed, 0.5f);
+            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.WalkSpeed, 0.5f);
         }
 
 
-        controller.Move(transform.forward * moveDir.z * moveSpeed * Time.deltaTime);
-        controller.Move(transform.right * moveDir.x * moveSpeed * Time.deltaTime);
+        controller.Move(transform.forward * moveDir.z * data.MoveSpeed * Time.deltaTime);
+        controller.Move(transform.right * moveDir.x * data.MoveSpeed * Time.deltaTime);
 
         //Mathf.Lerp();
-        animator.SetFloat("XSpeed", moveDir.x, 0.1f, Time.deltaTime);
-        animator.SetFloat("YSpeed", moveDir.z, 0.1f, Time.deltaTime);
-        animator.SetFloat("Speed", moveSpeed);
+        data.Anim.SetFloat("XSpeed", moveDir.x, 0.1f, Time.deltaTime);
+        data.Anim.SetFloat("YSpeed", moveDir.z, 0.1f, Time.deltaTime);
+        data.Anim.SetFloat("Speed", data.MoveSpeed);
     }
     private void OnMove(InputValue value)
     {
@@ -62,6 +63,10 @@ public class PlayerMover : PlayerData
 
     private void OnRun(InputValue value)
     {
+        if (data.Anim.GetBool("IsJump"))
+        {
+            return;
+        }
         isRun = value.isPressed;
     }
     private void OnSit(InputValue value)
@@ -69,35 +74,39 @@ public class PlayerMover : PlayerData
         if (isSit) { isSit = false; }
         else { isSit = true; }
 
-        animator.SetBool("Sit", isSit);
+        data.Anim.SetBool("Sit", isSit);
     }
 
     private void Jump()
     {
+        if (isSit)
+        {
+            return;
+        }
         zSpeed += Physics.gravity.y * Time.deltaTime;
 
         // 바닥에 있고 하강중이라면
         if (IsGrounded() && zSpeed < 0)
         {
             zSpeed = -1;
-            animator.SetBool("IsJump", false);
-            animator.SetBool("IsFloat", false);
+            data.Anim.SetBool("IsJump", false);
+            data.Anim.SetBool("IsFloat", false);
         }
         else if (!IsGrounded() && IsFloat() && zSpeed < -3 && zSpeed > -5) {
-            animator.SetTrigger("Floating");
-            animator.SetBool("IsFloat", true);
+            data.Anim.SetTrigger("Floating");
+            data.Anim.SetBool("IsFloat", true);
         }
 
-        animator.SetFloat("ZSpeed", zSpeed);
+        data.Anim.SetFloat("ZSpeed", zSpeed);
         controller.Move(Vector3.up * zSpeed * Time.deltaTime);
     }
     private void OnJump(InputValue value)
     {
         if (IsGrounded())
         {
-            animator.SetBool("IsJump", true);
-            animator.SetTrigger("JumpStart");
-            zSpeed = jumpSpeed;
+            data.Anim.SetBool("IsJump", true);
+            data.Anim.SetTrigger("JumpStart");
+            zSpeed = data.JumpSpeed;
         }
     }
     private bool IsFloat()

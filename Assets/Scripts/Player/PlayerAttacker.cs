@@ -5,13 +5,14 @@ using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerAttacker : PlayerData
+public class PlayerAttacker : MonoBehaviour
 {
+    private PlayerData data;
     [SerializeField] bool debug;
     // smg, 라이플, ar = 레이케스트
     // 샷건, 칼 = OverlapSphere
     // 최적화 위해 총알은 파티클 시스템 사용?
-    [SerializeField] WeaponBase curWeapon;
+    [SerializeField] WeaponBase curWeapon;             // 현 무기
     [SerializeField] LayerMask targetMask;
     [SerializeField] LayerMask obstacleMask;
     private float cosResult;
@@ -20,6 +21,7 @@ public class PlayerAttacker : PlayerData
     private void Awake()
     {
         cosResult = Mathf.Cos(curWeapon.Angle * 0.5f * Mathf.Deg2Rad);
+        data = GetComponent<PlayerData>();
     }
 
     private void OnAttack(InputValue value)
@@ -43,7 +45,7 @@ public class PlayerAttacker : PlayerData
                 else
                 {
                     IHittable hittable = collider.GetComponent<IHittable>();
-                    hittable?.TakeHit(CurATK + curWeapon.Damage);
+                    hittable?.TakeHit(data.CurATK + curWeapon.Damage);
                 }
             }
 
@@ -55,7 +57,7 @@ public class PlayerAttacker : PlayerData
             if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, curWeapon.Range))
             {
                 IHittable target = hit.transform.GetComponent<IHittable>();
-                target?.TakeHit(CurATK + curWeapon.Damage);
+                target?.TakeHit(data.CurATK + curWeapon.Damage);
             }
         }
         // 3. 샷건용
@@ -74,7 +76,7 @@ public class PlayerAttacker : PlayerData
                 else
                 {
                     IHittable hittable = collider.GetComponent<IHittable>();
-                    hittable?.TakeHit(CurATK + curWeapon.Damage);
+                    hittable?.TakeHit(data.CurATK + curWeapon.Damage);
                 }
             }
         }

@@ -7,14 +7,14 @@ using UnityEngine;
 public class PlayerData : MonoBehaviour
 {
     #region Player Info Data
-    protected new string name = "Unity";
-    protected int HP = 100;                       // 체력
-    protected int maxHP = 100;                    // 최대 체력
-    protected int ATK = 10;                      // 공격 
+    protected new string name = "Unity";        // 이름 
+    protected int HP = 100;                     // 체력
+    protected int maxHP = 100;                  // 최대 체력
+    protected int ATK = 10;                     // 공격 
     protected int DEF = 5;                      // 방어 
 
-    protected Animator animator;                // 애니메이터
     protected List<WeaponBase> weapon;          // 보유 무기들
+    protected Animator animator;                // 애니메이터
     #endregion
 
     #region PlayerMoveData
@@ -28,16 +28,20 @@ public class PlayerData : MonoBehaviour
     #endregion
 
     #region Get, Set
-    public string Name { get { return name; } protected set { } }
-    public int CurHP { get { return HP; } protected set { } }
-    public int MaxHP { get { return maxHP; } protected set { } }
-    public int CurATK { get { return ATK; } protected set { } }
-    public int CurDEF { get { return DEF; } protected set { } }
+    public string Name { get { return name; }  }
+    public int CurHP { get { return HP; } }
+    public int MaxHP { get { return maxHP; } }
+    public int CurATK { get { return ATK; } }
+    public int CurDEF { get { return DEF; } }
 
-    public float CurWalkSpeed { get { return crouchSpeed; } protected set { } }
-    public float WalkSpeed { get { return walkSpeed;} protected set { } }
-    public float RunSpeed { get { return runSpeed;} protected set { } }
-    public float JumpSpeed { get { return jumpSpeed;} protected set { } }
+    public Animator Anim { get { return animator; } }
+
+
+    public float MoveSpeed { get { return moveSpeed; } set { moveSpeed = value; } }
+    public float CrouchSpeed { get { return crouchSpeed; } }
+    public float WalkSpeed { get { return walkSpeed;} }
+    public float RunSpeed { get { return runSpeed;} }
+    public float JumpSpeed { get { return jumpSpeed;} }
     #endregion
 
     private void Awake()
