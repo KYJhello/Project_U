@@ -24191,6 +24191,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1868479499}
     - target: {fileID: 6717975996162588777, guid: b82e334067fd78d42803e39af07b2be3, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6717975996162588777, guid: b82e334067fd78d42803e39af07b2be3, type: 3}
       propertyPath: crouchSpeed
       value: 2
       objectReference: {fileID: 0}

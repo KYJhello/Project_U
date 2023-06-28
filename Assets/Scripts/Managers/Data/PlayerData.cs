@@ -25,6 +25,7 @@ public class PlayerData : MonoBehaviour
     protected float walkSpeed = 3;
     protected float runSpeed = 10;
     protected float jumpSpeed = 5;
+    protected float rollSpeed = 10f;
     #endregion
 
     #region Get, Set
@@ -42,6 +43,7 @@ public class PlayerData : MonoBehaviour
     public float WalkSpeed { get { return walkSpeed;} }
     public float RunSpeed { get { return runSpeed;} }
     public float JumpSpeed { get { return jumpSpeed;} }
+    public float RollSpeed { get { return  rollSpeed;} }
     #endregion
 
     private void Awake()

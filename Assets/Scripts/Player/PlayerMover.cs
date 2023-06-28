@@ -7,53 +7,102 @@ public class PlayerMover : MonoBehaviour
 {
     private PlayerData data;
     private CharacterController controller;
-    Vector3 moveDir;
-    private float ySpeed = 0; // 앞 뒤
+    private Vector3 moveDir;
+    public Vector3 MoveDir { get; private set; }
     private float zSpeed = 0; // 위 아래
+
 
     private bool isRun;
     private bool isSit;
+    private bool isRoll;
 
+    public Coroutine moveRoutine;
+    public Coroutine jumpRoutine;
+    public Coroutine rollRoutine;
 
     private void Awake()
     {
         data = GetComponent<PlayerData>();
         controller = GetComponent<CharacterController>();
     }
-    private void Update()
+
+    public void Move()
     {
-        Move();
-        Jump();
+        moveRoutine = StartCoroutine(MoveRoutine());
+    }
+    public void Jump()
+    {
+        jumpRoutine = StartCoroutine(JumpRoutine());
     }
 
-    private void Move()
+    IEnumerator MoveRoutine()
     {
-        // 안움직임
-        if (moveDir.magnitude == 0)  // 안움직임
+        while (true)
         {
-            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, 0, 0.5f); // 선형 보간
-        }
-        else if(isSit)      // 앉음
-        {
-            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.CrouchSpeed, 0.5f);
-        }
-        else if (isRun)       // 뜀  
-        {
-            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.RunSpeed, 0.5f);
-        }
-        else                   // 걸음     
-        {
-            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.WalkSpeed, 0.5f);
-        }
+            // 안움직임
+            if (moveDir.magnitude == 0)  // 안움직임
+            {
+                data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, 0, 0.5f); // 선형 보간
+            }
+            else if (isSit)      // 앉음
+            {
+                data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.CrouchSpeed, 0.5f);
+            }
+            else if (isRun)       // 뜀  
+            {
+                data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.RunSpeed, 0.5f);
+            }
+            else                   // 걸음     
+            {
+                data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.WalkSpeed, 0.5f);
+            }
 
 
-        controller.Move(transform.forward * moveDir.z * data.MoveSpeed * Time.deltaTime);
-        controller.Move(transform.right * moveDir.x * data.MoveSpeed * Time.deltaTime);
+            controller.Move(transform.forward * moveDir.z * data.MoveSpeed * Time.deltaTime);
+            controller.Move(transform.right * moveDir.x * data.MoveSpeed * Time.deltaTime);
 
-        //Mathf.Lerp();
-        data.Anim.SetFloat("XSpeed", moveDir.x, 0.1f, Time.deltaTime);
-        data.Anim.SetFloat("YSpeed", moveDir.z, 0.1f, Time.deltaTime);
-        data.Anim.SetFloat("Speed", data.MoveSpeed);
+            //Mathf.Lerp();
+            data.Anim.SetFloat("XSpeed", moveDir.x, 0.1f, Time.deltaTime);
+            data.Anim.SetFloat("YSpeed", moveDir.z, 0.1f, Time.deltaTime);
+            data.Anim.SetFloat("Speed", data.MoveSpeed);
+            yield return null;
+        }
+    }
+
+    IEnumerator RollRoutine()
+    {
+        while (true)
+        {
+            controller.Move(transform.forward * 1f * data.RollSpeed * Time.deltaTime);
+            controller.Move(transform.right * moveDir.x * data.RollSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+    }
+    IEnumerator JumpRoutine()
+    {
+        while (true)
+        {
+            zSpeed += Physics.gravity.y * Time.deltaTime;
+
+            // 바닥에 있고 하강중이라면
+            if (IsGrounded() && zSpeed < 0)
+            {
+                zSpeed = -1;
+                data.Anim.SetBool("IsJump", false);
+                data.Anim.SetBool("IsFloat", false);
+            }
+            else if (!IsGrounded() && IsFloat() && zSpeed < -3 && zSpeed > -5)
+            {
+                data.Anim.SetTrigger("Floating");
+                data.Anim.SetBool("IsFloat", true);
+            }
+
+            data.Anim.SetFloat("ZSpeed", zSpeed);
+            controller.Move(Vector3.up * zSpeed * Time.deltaTime);
+
+            yield return null;
+        }
     }
     private void OnMove(InputValue value)
     {
@@ -77,37 +126,28 @@ public class PlayerMover : MonoBehaviour
         data.Anim.SetBool("Sit", isSit);
     }
 
-    private void Jump()
+    private void OnRoll(InputValue value)
+    {
+        data.Anim.SetTrigger("Roll");
+        rollRoutine = StartCoroutine(RollRoutine());
+        StopCoroutine(rollRoutine);
+    }
+
+  
+
+    private void OnJump(InputValue value)
     {
         if (isSit)
         {
             return;
         }
-        zSpeed += Physics.gravity.y * Time.deltaTime;
-
-        // 바닥에 있고 하강중이라면
-        if (IsGrounded() && zSpeed < 0)
-        {
-            zSpeed = -1;
-            data.Anim.SetBool("IsJump", false);
-            data.Anim.SetBool("IsFloat", false);
-        }
-        else if (!IsGrounded() && IsFloat() && zSpeed < -3 && zSpeed > -5) {
-            data.Anim.SetTrigger("Floating");
-            data.Anim.SetBool("IsFloat", true);
-        }
-
-        data.Anim.SetFloat("ZSpeed", zSpeed);
-        controller.Move(Vector3.up * zSpeed * Time.deltaTime);
-    }
-    private void OnJump(InputValue value)
-    {
         if (IsGrounded())
         {
             data.Anim.SetBool("IsJump", true);
             data.Anim.SetTrigger("JumpStart");
             zSpeed = data.JumpSpeed;
         }
+        Jump();
     }
     private bool IsFloat()
     {
