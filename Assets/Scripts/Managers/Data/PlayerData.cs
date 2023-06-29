@@ -27,8 +27,18 @@ public class PlayerData : MonoBehaviour
     protected float jumpSpeed = 5;
     protected float rollSpeed = 10f;
 
-    public bool isRoll;
+
     #endregion
+
+    #region PlayerController
+    [HideInInspector] public bool isRoll;
+    [HideInInspector] public bool isHit = false;
+    [HideInInspector] public float hitDelay;
+    [HideInInspector] public float hitCool = 1f;
+    [HideInInspector] public float reloadDelay;
+    [HideInInspector] public float reloadCool = 1f;
+    #endregion
+
 
     #region Get, Set
     public string Name { get { return name; }  }

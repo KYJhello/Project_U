@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour, IHittable
 {
-    private bool isHit = false;
-    private float hitDelay = 3f;
-    private float hitCool = 3f;
     private int curDamage;
 
     private PlayerData data;
@@ -19,8 +17,8 @@ public class PlayerController : MonoBehaviour, IHittable
 
     public UnityEvent<int> OnHit;
     
-    public Collider collider;
     private Coroutine hitRoutine;
+    //private Coroutine reloadRoutine;
 
     private void Awake()
     {
@@ -30,14 +28,17 @@ public class PlayerController : MonoBehaviour, IHittable
         interactor = GetComponent<PlayerInteractor>();
         camController = GetComponent<ThirdCamController>();
 
-        collider = GetComponent<Collider>();
+        data.hitDelay = data.hitCool;
+    }
+    private void OnEnable()
+    {
         hitRoutine = StartCoroutine(HitRoutine());
     }
-
-    public void Update()
+    private void OnDisable()
     {
-
+        StopCoroutine(hitRoutine);
     }
+
 
     private bool IsDie()
     {
@@ -54,7 +55,6 @@ public class PlayerController : MonoBehaviour, IHittable
         attacker.enabled = false;
         interactor.enabled = false;
         camController.enabled = false;
-        collider.enabled = false;
     }
     public void TakeHit(int damage)
     {
@@ -64,17 +64,23 @@ public class PlayerController : MonoBehaviour, IHittable
             return;
         }
         curDamage = damage;
-        isHit = true;
+        data.isHit = true;
+    }
+
+    private void OnReload(InputValue value)
+    {
+        data.Anim.SetTrigger("Reload");
     }
 
     IEnumerator HitRoutine()
     {
         while (true)
         {
-            if (isHit && hitDelay > 0)
+            if (data.isHit && data.hitDelay > 0)
             {
-                if(hitDelay == hitCool)
+                if(data.hitDelay == data.hitCool)
                 {
+                    //mover.enabled = false;
                     Debug.Log("getDamage");
                     data.CurHP -= curDamage;
                     Debug.Log("Cur HP : " + data.CurHP);
@@ -87,18 +93,19 @@ public class PlayerController : MonoBehaviour, IHittable
                         data.Anim.SetTrigger("Hit");
                     }
                 }
-                hitDelay -= Time.deltaTime;
-                if (hitDelay <= 0 && isHit)
+                data.hitDelay -= Time.deltaTime;
+                if (data.hitDelay <= 0 && data.isHit)
                 {
-                    isHit = false;
-                    hitDelay = hitCool;
+                    data.isHit = false;
+                    data.hitDelay = data.hitCool;
+                    //mover.enabled = true;
                 }
                 
             }
             yield return null;
         }
-
     }
+
 
     //    private PlayerData data;
     //    private PlayerMover mover;

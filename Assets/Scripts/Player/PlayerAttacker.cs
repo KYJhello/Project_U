@@ -15,6 +15,8 @@ public class PlayerAttacker : MonoBehaviour
     [SerializeField] WeaponBase curWeapon;             // 현 무기
     [SerializeField] LayerMask targetMask;
     [SerializeField] LayerMask obstacleMask;
+
+    [SerializeField] TrailRenderer bulletTrail;
     private float cosResult;
 
 
@@ -58,11 +60,13 @@ public class PlayerAttacker : MonoBehaviour
             {
                 IHittable target = hit.transform.GetComponent<IHittable>();
                 target?.TakeHit(data.CurATK + curWeapon.Damage);
+
             }
         }
         // 3. 샷건용
         else
         {
+            data.Anim.SetTrigger("Fire");
             // 1. 범위 안에 있는지
             Collider[] colliders = Physics.OverlapSphere(transform.position, curWeapon.Range, targetMask);
             foreach (Collider collider in colliders)
@@ -77,8 +81,22 @@ public class PlayerAttacker : MonoBehaviour
                 {
                     IHittable hittable = collider.GetComponent<IHittable>();
                     hittable?.TakeHit(data.CurATK + curWeapon.Damage);
+
+                    if (hittable != null)
+                    {
+                        TrailRenderer trail = GameManager.Instantiate(bulletTrail, curWeapon.transform);
+                        trail.Clear();
+                        float totalTime = Vector2.Distance(curWeapon.transform.position, collider.transform.position) / 10f;
+                        float rate = 0;
+                        while (rate < 1)
+                        {
+                            trail.transform.position = Vector3.Lerp(curWeapon.transform.position, collider.transform.position, rate);
+                            rate += Time.deltaTime / totalTime;
+                        }
+                    }
                 }
             }
+
         }
     }
     private void OnDrawGizmosSelected()

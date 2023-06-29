@@ -16,9 +16,9 @@ public class PlayerMover : MonoBehaviour
     private bool isSit;
 
 
-    public Coroutine moveRoutine;
-    public Coroutine jumpRoutine;
-    public Coroutine rollRoutine;
+    //public Coroutine moveRoutine;
+    //public Coroutine jumpRoutine;
+    //public Coroutine rollRoutine;
 
     private void Awake()
     {
@@ -39,6 +39,7 @@ public class PlayerMover : MonoBehaviour
 
     public void Move()
     {
+
         // 안움직임
         if (moveDir.magnitude == 0)  // 안움직임
         {
@@ -56,9 +57,9 @@ public class PlayerMover : MonoBehaviour
         {
             data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.WalkSpeed, 0.5f);
         }
-        if (data.isRoll)
+        if (data.isRoll || (data.isHit && data.hitDelay >= 0.5f))
         {
-            data.MoveSpeed = 0.1f;
+            data.MoveSpeed = 0.0f;
         }
 
         controller.Move(transform.forward * moveDir.z * data.MoveSpeed * Time.deltaTime);
@@ -69,6 +70,8 @@ public class PlayerMover : MonoBehaviour
         data.Anim.SetFloat("YSpeed", moveDir.z, 0.1f, Time.deltaTime);
         data.Anim.SetFloat("Speed", data.MoveSpeed);
     }
+
+    
     public void Jump()
     {
         zSpeed += Physics.gravity.y * Time.deltaTime;
@@ -121,7 +124,7 @@ public class PlayerMover : MonoBehaviour
 
     private void OnJump(InputValue value)
     {
-        if (isSit || data.isRoll)
+        if (isSit || data.isRoll || data.isHit)
         {
             return;
         }
