@@ -2,269 +2,364 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IHittable
 {
+    private bool isHit = false;
+    private float hitDelay = 3f;
+    private float hitCool = 3f;
+    private int curDamage;
+
     private PlayerData data;
     private PlayerMover mover;
     private PlayerAttacker attacker;
     private PlayerInteractor interactor;
+    private ThirdCamController camController;
 
-    public enum State { Idle = 0, Move, Jump, Roll, Attack, Damage, Die }
-    StateMachine<State, PlayerController> stateMachine;
+    public UnityEvent<int> OnHit;
     
-    public List<Coroutine> coroutines;
+    public Collider collider;
+    private Coroutine hitRoutine;
 
-    public void NowChangeWeapon(WeaponType weaponType)
-    {
-        data.Anim.SetInteger("CurWeapon", (int)weaponType);
-    }
     private void Awake()
     {
         data = GetComponent<PlayerData>();
         mover = GetComponent<PlayerMover>();
         attacker = GetComponent<PlayerAttacker>();
         interactor = GetComponent<PlayerInteractor>();
+        camController = GetComponent<ThirdCamController>();
 
-        coroutines = new List<Coroutine>();
-
-        stateMachine = new StateMachine<State, PlayerController>(this);
-        stateMachine.AddState(State.Idle,       new IdleState(this, stateMachine ));
-        stateMachine.AddState(State.Move,       new MoveState(this, stateMachine));
-        stateMachine.AddState(State.Jump,       new JumpState(this, stateMachine));
-        stateMachine.AddState(State.Roll,       new RollState(this, stateMachine));
-        stateMachine.AddState(State.Attack,     new AttackState(this, stateMachine));
-        stateMachine.AddState(State.Damage,     new DamageState(this, stateMachine));
-        stateMachine.AddState(State.Die,        new DieState(this, stateMachine));
-    }
-    private void Start()
-    {
-        stateMachine.Update();
-    }
-    protected void Die()
-    {
-        stateMachine.ChangeState(State.Die);
+        collider = GetComponent<Collider>();
+        hitRoutine = StartCoroutine(HitRoutine());
     }
 
-
-
-
-    #region State
-    private abstract class PlayerState : StateBase<State, PlayerController>
+    public void Update()
     {
 
-        protected PlayerState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
-        {
-
-        }
     }
-    private class IdleState : PlayerState
+
+    private bool IsDie()
     {
-        public IdleState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+        if(data.CurHP <= 0)
         {
-
+            return true;
         }
-
-        public override void Enter()
-        {
-            
-        }
-
-        public override void Exit()
-        {
-        }
-
-        public override void Setup()
-        {
-        }
-
-        public override void Transition()
-        {
-            if(owner.mover.MoveDir != Vector3.zero) {
-                stateMachine.ChangeState(State.Move);
-            }
-        }
-
-        public override void Update()
-        {
-            
-        }
+        return false;
     }
-    private class MoveState : PlayerState
+    private void Die()
     {
-        public MoveState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+        data.Anim.SetTrigger("Death");
+        mover.enabled = false;
+        attacker.enabled = false;
+        interactor.enabled = false;
+        camController.enabled = false;
+        collider.enabled = false;
+    }
+    public void TakeHit(int damage)
+    {
+        if(data.isRoll)
         {
-
-        }
-
-        public override void Enter()
-        {
-            owner.mover.Move();
-        }
-
-        public override void Exit()
-        {
-        }
-
-        public override void Setup()
-        {
-        }
-
-        public override void Transition()
-        {
-
-        }
-
-        public override void Update()
-        {
+            curDamage = 0;
             return;
         }
+        curDamage = damage;
+        isHit = true;
     }
-    private class JumpState : PlayerState
+
+    IEnumerator HitRoutine()
     {
-        public JumpState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+        while (true)
         {
-
+            if (isHit && hitDelay > 0)
+            {
+                if(hitDelay == hitCool)
+                {
+                    Debug.Log("getDamage");
+                    data.CurHP -= curDamage;
+                    Debug.Log("Cur HP : " + data.CurHP);
+                    if (IsDie())
+                    {
+                        Die();
+                    }
+                    else
+                    {
+                        data.Anim.SetTrigger("Hit");
+                    }
+                }
+                hitDelay -= Time.deltaTime;
+                if (hitDelay <= 0 && isHit)
+                {
+                    isHit = false;
+                    hitDelay = hitCool;
+                }
+                
+            }
+            yield return null;
         }
 
-        public override void Enter()
-        {
-
-        }
-
-        public override void Exit()
-        {
-        }
-
-        public override void Setup()
-        {
-        }
-
-        public override void Transition()
-        {
-
-        }
-
-        public override void Update()
-        {
-        }
     }
-    private class RollState : PlayerState
-    {
-        public RollState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
-        {
 
-        }
+    //    private PlayerData data;
+    //    private PlayerMover mover;
+    //    private PlayerAttacker attacker;
+    //    private PlayerInteractor interactor;
 
-        public override void Enter()
-        {
+    //    public enum State { Idle = 0, Move, Jump, Roll, Attack, Damage, Die }
+    //    StateMachine<State, PlayerController> stateMachine;
 
-        }
+    //    public List<Coroutine> coroutines;
 
-        public override void Exit()
-        {
-        }
+    //    public void NowChangeWeapon(WeaponType weaponType)
+    //    {
+    //        data.Anim.SetInteger("CurWeapon", (int)weaponType);
+    //    }
+    //    private void Awake()
+    //    {
+    //        data = GetComponent<PlayerData>();
+    //        mover = GetComponent<PlayerMover>();
+    //        attacker = GetComponent<PlayerAttacker>();
+    //        interactor = GetComponent<PlayerInteractor>();
 
-        public override void Setup()
-        {
-        }
+    //        coroutines = new List<Coroutine>();
 
-        public override void Transition()
-        {
+    //        stateMachine = new StateMachine<State, PlayerController>(this);
+    //        stateMachine.AddState(State.Idle,       new IdleState(this, stateMachine ));
+    //        stateMachine.AddState(State.Move,       new MoveState(this, stateMachine));
+    //        stateMachine.AddState(State.Jump,       new JumpState(this, stateMachine));
+    //        stateMachine.AddState(State.Roll,       new RollState(this, stateMachine));
+    //        stateMachine.AddState(State.Attack,     new AttackState(this, stateMachine));
+    //        stateMachine.AddState(State.Damage,     new DamageState(this, stateMachine));
+    //        stateMachine.AddState(State.Die,        new DieState(this, stateMachine));
+    //    }
+    //    private void Start()
+    //    {
+    //        stateMachine.Update();
+    //    }
+    //    protected void Die()
+    //    {
+    //        stateMachine.ChangeState(State.Die);
+    //    }
 
-        }
 
-        public override void Update()
-        {
-        }
-    }
-    private class AttackState : PlayerState
-    {
-        public AttackState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
-        {
 
-        }
 
-        public override void Enter()
-        {
+    //    #region State
+    //    private abstract class PlayerState : StateBase<State, PlayerController>
+    //    {
 
-        }
+    //        protected PlayerState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+    //        {
 
-        public override void Exit()
-        {
-        }
+    //        }
+    //    }
+    //    private class IdleState : PlayerState
+    //    {
+    //        public IdleState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+    //        {
 
-        public override void Setup()
-        {
-        }
+    //        }
 
-        public override void Transition()
-        {
+    //        public override void Enter()
+    //        {
 
-        }
+    //        }
 
-        public override void Update()
-        {
-        }
-    }
-    private class DamageState : PlayerState
-    {
-        public DamageState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
-        {
+    //        public override void Exit()
+    //        {
+    //        }
 
-        }
+    //        public override void Setup()
+    //        {
+    //        }
 
-        public override void Enter()
-        {
+    //        public override void Transition()
+    //        {
+    //            if(owner.mover.MoveDir != Vector3.zero) {
+    //                stateMachine.ChangeState(State.Move);
+    //            }
+    //        }
 
-        }
+    //        public override void Update()
+    //        {
 
-        public override void Exit()
-        {
-        }
+    //        }
+    //    }
+    //    private class MoveState : PlayerState
+    //    {
+    //        public MoveState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+    //        {
 
-        public override void Setup()
-        {
-        }
+    //        }
 
-        public override void Transition()
-        {
+    //        public override void Enter()
+    //        {
+    //            owner.mover.Move();
+    //        }
 
-        }
+    //        public override void Exit()
+    //        {
+    //        }
 
-        public override void Update()
-        {
-        }
-    }
-    private class DieState : PlayerState
-    {
-        public DieState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
-        {
+    //        public override void Setup()
+    //        {
+    //        }
 
-        }
+    //        public override void Transition()
+    //        {
 
-        public override void Enter()
-        {
+    //        }
 
-        }
+    //        public override void Update()
+    //        {
+    //            return;
+    //        }
+    //    }
+    //    private class JumpState : PlayerState
+    //    {
+    //        public JumpState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+    //        {
 
-        public override void Exit()
-        {
-        }
+    //        }
 
-        public override void Setup()
-        {
-        }
+    //        public override void Enter()
+    //        {
 
-        public override void Transition()
-        {
+    //        }
 
-        }
+    //        public override void Exit()
+    //        {
+    //        }
 
-        public override void Update()
-        {
-        }
-    }
-    #endregion
+    //        public override void Setup()
+    //        {
+    //        }
+
+    //        public override void Transition()
+    //        {
+
+    //        }
+
+    //        public override void Update()
+    //        {
+    //        }
+    //    }
+    //    private class RollState : PlayerState
+    //    {
+    //        public RollState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+    //        {
+
+    //        }
+
+    //        public override void Enter()
+    //        {
+
+    //        }
+
+    //        public override void Exit()
+    //        {
+    //        }
+
+    //        public override void Setup()
+    //        {
+    //        }
+
+    //        public override void Transition()
+    //        {
+
+    //        }
+
+    //        public override void Update()
+    //        {
+    //        }
+    //    }
+    //    private class AttackState : PlayerState
+    //    {
+    //        public AttackState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+    //        {
+
+    //        }
+
+    //        public override void Enter()
+    //        {
+
+    //        }
+
+    //        public override void Exit()
+    //        {
+    //        }
+
+    //        public override void Setup()
+    //        {
+    //        }
+
+    //        public override void Transition()
+    //        {
+
+    //        }
+
+    //        public override void Update()
+    //        {
+    //        }
+    //    }
+    //    private class DamageState : PlayerState
+    //    {
+    //        public DamageState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+    //        {
+
+    //        }
+
+    //        public override void Enter()
+    //        {
+
+    //        }
+
+    //        public override void Exit()
+    //        {
+    //        }
+
+    //        public override void Setup()
+    //        {
+    //        }
+
+    //        public override void Transition()
+    //        {
+
+    //        }
+
+    //        public override void Update()
+    //        {
+    //        }
+    //    }
+    //    private class DieState : PlayerState
+    //    {
+    //        public DieState(PlayerController owner, StateMachine<State, PlayerController> stateMachine) : base(owner, stateMachine)
+    //        {
+
+    //        }
+
+    //        public override void Enter()
+    //        {
+
+    //        }
+
+    //        public override void Exit()
+    //        {
+    //        }
+
+    //        public override void Setup()
+    //        {
+    //        }
+
+    //        public override void Transition()
+    //        {
+
+    //        }
+
+    //        public override void Update()
+    //        {
+    //        }
+    //    }
+    //    #endregion
 
 }

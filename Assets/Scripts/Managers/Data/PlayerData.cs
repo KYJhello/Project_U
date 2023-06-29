@@ -26,11 +26,13 @@ public class PlayerData : MonoBehaviour
     protected float runSpeed = 10;
     protected float jumpSpeed = 5;
     protected float rollSpeed = 10f;
+
+    public bool isRoll;
     #endregion
 
     #region Get, Set
     public string Name { get { return name; }  }
-    public int CurHP { get { return HP; } }
+    public int CurHP { get { return HP; } set { HP = value; } }
     public int MaxHP { get { return maxHP; } }
     public int CurATK { get { return ATK; } }
     public int CurDEF { get { return DEF; } }

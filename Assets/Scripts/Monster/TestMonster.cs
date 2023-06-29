@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.AI;
+using Unity.VisualScripting.FullSerializer;
 
 public class TestMonster : NonHumanMonster, IHittable
 {
     private Transform player;
     private Vector3 moveDir;
     NavMeshAgent agent;
+
+    [SerializeField] LayerMask layerMask;
 
     private void Awake()
     {
@@ -32,7 +35,7 @@ public class TestMonster : NonHumanMonster, IHittable
             Destroy(gameObject);
         }
     }
-    public void TakeHit(int damage)
+    public new void TakeHit(int damage)
     {
         HP -= damage;
     }
@@ -55,5 +58,39 @@ public class TestMonster : NonHumanMonster, IHittable
             yield return new WaitForSeconds(0.2f);
         }
     }
+    Coroutine attackRoutine;
+    private void OnTriggerEnter(Collider other)
+    {
+        IHittable hittable = other.GetComponent<IHittable>();
+        hittable?.TakeHit(ATK);
+    }
+    private void OnTriggerStay(Collider other)
+    {
+        IHittable hittable = other.GetComponent<IHittable>();
+        hittable?.TakeHit(ATK);
+    }
+    private void OnTriggerExit(Collider other)
+    {
 
+    }
+
+    IEnumerator AttackRoutine()
+    {
+        while (true)
+        {
+            Collider[] colliders = Physics.OverlapSphere(transform.position, 0.5f, layerMask);
+            
+            
+            foreach (Collider collider in colliders)
+            {
+                //if (Mathf.Abs(Vector3.Distance(collider.transform.position, transform.position)) >= 2f)
+                //{
+                //    yield return null;
+                //}
+                IHittable hittable = collider.GetComponent<IHittable>();
+                hittable?.TakeHit(ATK);
+            }
+            yield return new WaitForSeconds(1f);
+        }
+    }
 }
