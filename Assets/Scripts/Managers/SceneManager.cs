@@ -29,9 +29,16 @@ public class SceneManager : MonoBehaviour
     {
         this.loadingUI.enabled = false;
     }
-    public void LoadScene(string sceneName)
+    public void LoadScene(string sceneName, bool isLoading)
     {
-        StartCoroutine(LoadingRoutine(sceneName));
+        if (isLoading)
+        {
+            StartCoroutine(LoadingRoutine(sceneName));
+        }
+        else
+        {
+            AsyncOperation oper = UnitySceneManager.LoadSceneAsync(sceneName);
+        }
     }
     IEnumerator LoadingRoutine(string sceneName)
     {

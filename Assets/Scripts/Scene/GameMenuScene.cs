@@ -1,26 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class TitleScene : BaseScene
+public class GameMenuScene : BaseScene
 {
-    private void Awake()
-    {
-        
-    }
-
     protected override IEnumerator LoadingRoutine()
     {
         progress = 0.0f;
         yield return null;
         progress = 1.0f;
     }
-    private void OnDestroy()
+    public void OnGameButton()
     {
-        
+        GameManager.Scene.LoadScene("GameScene", false);
     }
-    public void OnStartButton()
+    private void OnESC(InputValue value)
     {
-        GameManager.Scene.LoadScene("GameScene", true);
+        OnGameButton();
     }
 }

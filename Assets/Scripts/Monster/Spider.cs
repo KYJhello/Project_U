@@ -11,6 +11,7 @@ public class Spider : Monster
 
     StateMachine<State, Spider> stateMachine;
     private Transform target;
+    private bool canHit = true;
 
     [SerializeField]
     private float moveSpeed;

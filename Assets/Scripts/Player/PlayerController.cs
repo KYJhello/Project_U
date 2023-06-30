@@ -20,6 +20,12 @@ public class PlayerController : MonoBehaviour, IHittable
     private Coroutine hitRoutine;
     //private Coroutine reloadRoutine;
 
+    public void EnableInput()
+    {
+        gameObject.GetComponent<PlayerInput>().enabled = true;
+        gameObject.GetComponent<ThirdCamController>().enabled = true;
+    }
+
     private void Awake()
     {
         data = GetComponent<PlayerData>();
@@ -70,6 +76,24 @@ public class PlayerController : MonoBehaviour, IHittable
     private void OnReload(InputValue value)
     {
         data.Anim.SetTrigger("Reload");
+    }
+    private void OnAlt(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            camController.OnDisable();
+            camController.enabled = false;
+            attacker.enabled = false;
+        }
+        else
+        {
+            if (camController.enabled)
+            {
+                camController.OnEnable();
+                camController.enabled = true;
+                attacker.enabled = true;
+            }
+        }
     }
 
     IEnumerator HitRoutine()

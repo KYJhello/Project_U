@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class InteractAdaptor : MonoBehaviour
+public class InteractAdaptor : MonoBehaviour, IInteractable
 {
-    public UnityEvent<PlayerInteractor> OnInvoked;
+    public UnityEvent OnInvoked;
 
-    public void Interact(PlayerInteractor interactor)
+    public void Interact()
     {
-        OnInvoked?.Invoke(interactor);
+        Debug.Log("interact");
+        OnInvoked?.Invoke();
     }
 }

@@ -139,6 +139,7 @@ GameObject:
   - component: {fileID: 947074119682735095}
   - component: {fileID: 947074119682735094}
   - component: {fileID: 947074119682735093}
+  - component: {fileID: 5602176209259442936}
   - component: {fileID: 947074119682735092}
   m_Layer: 5
   m_Name: ItemCanvas
@@ -212,6 +213,18 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 0
+--- !u!114 &5602176209259442936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 947074119682735091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89f97fb3293ea8249bdf3967091a1b57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &947074119682735092
 MonoBehaviour:
   m_ObjectHideFlags: 0

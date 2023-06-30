@@ -14,11 +14,11 @@ public class ThirdCamController : MonoBehaviour
     private float xRotation;
     private float yRotation;
 
-    private void OnEnable()
+    public void OnEnable()
     {
         Cursor.lockState = CursorLockMode.Locked;
     }
-    private void OnDisable()
+    public void OnDisable()
     {
         Cursor.lockState = CursorLockMode.None;
     }

@@ -15,12 +15,8 @@ public class PlayerInteractor : MonoBehaviour
         Collider[] colliders = Physics.OverlapSphere(point.position, interactRange);
         foreach(Collider collider in colliders)
         {
-            InteractAdaptor adaptor = collider.GetComponent<InteractAdaptor>();
-            if(adaptor != null)
-            {
-                adaptor.Interact(this);
-                break;
-            }
+            IInteractable interactable = collider.GetComponent<IInteractable>();
+            interactable?.Interact();
         }
     }
     private void OnInteract(InputValue value)
