@@ -61,6 +61,8 @@ public class PlayerController : MonoBehaviour, IHittable
         attacker.enabled = false;
         interactor.enabled = false;
         camController.enabled = false;
+
+        OnDisable();
     }
     public void TakeHit(int damage)
     {
@@ -69,8 +71,20 @@ public class PlayerController : MonoBehaviour, IHittable
             curDamage = 0;
             return;
         }
-        curDamage = damage;
+        curDamage = CalDamage(damage);
+        //Debug.Log(curDamage);
         data.isHit = true;
+    }
+    private int CalDamage(int damage)
+    {
+        if((damage - data.CurDEF) < 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return damage - data.CurDEF;
+        }
     }
 
     private void OnReload(InputValue value)
@@ -129,6 +143,8 @@ public class PlayerController : MonoBehaviour, IHittable
             yield return null;
         }
     }
+
+    
 
 
     //    private PlayerData data;

@@ -3,46 +3,59 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Threading;
 
 
-public class MonsterHPBarSlide : MonoBehaviour
+public class MonsterHPBarSlide : MonoBehaviour, IBarUI
 {
-    [SerializeField] MonsterBase monster;
+    MonsterData myData;
 
     private Slider slider;
     private TMP_Text[] infoText;
+    private Image[] images;
+
 
     private void Awake()
     {
         slider = GetComponentInChildren<Slider>();
         infoText = GetComponentsInChildren<TMP_Text>();
-    }
-    private void Start()
-    {
-        slider.maxValue = monster.GetMaxHP();
-        slider.value = monster.GetHP();
-        infoText[0].text = monster.GetName();
-        infoText[1].text = (monster.GetHP()).ToString() + " / " + (monster.GetMaxHP()).ToString();
-
-        monster.OnHpChanged.AddListener(SetValue);
+        images = GetComponentsInChildren<Image>();
+        SetEnable(false);
     }
     private void Update()
     {
-        if(monster == null)
+        if(myData != null)
         {
-            gameObject.SetActive(false);
-        }
-        else
-        {
-            gameObject.SetActive(true);
-        }
-        slider.value = monster.GetHP();
-        infoText[1].text = (monster.GetHP()).ToString() + " / " + (monster.GetMaxHP()).ToString();
+            if (myData.CurHP <= 0)
+            {
+                SetEnable(false);
+            }
 
-        monster.OnHpChanged.AddListener(SetValue);
+            slider.maxValue = myData.MaxHP;
+            slider.value = myData.CurHP;
+            infoText[0].text = myData.Name;
+            infoText[1].text = (myData.CurHP).ToString() + " / " + (myData.MaxHP).ToString();
+        }
     }
     public void SetValue(int value)
     {
         slider.value = value;
+    }
+    public void SetData(MonsterData data)
+    {
+        SetEnable(true);
+        myData = data;
+    }
+    private void SetEnable(bool state)
+    {
+        slider.enabled = state;
+        foreach (var item in infoText)
+        {
+            item.enabled = state;
+        }
+        foreach (var item in images)
+        {
+            item.enabled = state;
+        }
     }
 }

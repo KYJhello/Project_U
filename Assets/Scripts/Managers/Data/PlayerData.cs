@@ -8,9 +8,9 @@ public class PlayerData : MonoBehaviour
 {
     #region Player Info Data
     protected new string name = "Unity";        // 이름 
-    protected int HP = 100;                     // 체력
+    protected int HP = 70;                     // 체력
     protected int maxHP = 100;                  // 최대 체력
-    protected int ATK = 10;                     // 공격 
+    protected int ATK = 15;                     // 공격 
     protected int DEF = 5;                      // 방어 
 
     protected List<WeaponBase> weapon;          // 보유 무기들
@@ -26,8 +26,6 @@ public class PlayerData : MonoBehaviour
     protected float runSpeed = 10;
     protected float jumpSpeed = 5;
     protected float rollSpeed = 10f;
-
-
     #endregion
 
     #region PlayerController

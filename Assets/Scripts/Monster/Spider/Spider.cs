@@ -3,30 +3,38 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 using static UnityEngine.UI.GridLayoutGroup;
 
-public class Spider : Monster
+public class Spider : Monster, IHittable
 {
     public enum State { Idle = 0, Trace, Returning, Patrol, Attack, Damage, Die }
 
     StateMachine<State, Spider> stateMachine;
     private Transform target;
-    private bool canHit = true;
-
-    [SerializeField]
-    private float moveSpeed;
-    [SerializeField]
-    private float detectRange;
-    [SerializeField]
-    private float attackRange;
+    //private bool canHit = true;
+    //private int curDamage;
 
     private Vector3 moveDir;
     private NavMeshAgent agent;
 
-    //private List<Vector3> patrolPoints;
-    //private int patrolIdx;
+    SpiderData data;
+    MonsterHPBarSlide slide;
+    
+    Coroutine traceRoutine;
+    Coroutine returnRoutine;
+    Coroutine patrolRoutine;
+    Coroutine attackRoutine;
+    Coroutine damageRoutine;
+    Coroutine dieRoutine;
+
+    private List<Vector3> patrolPoints = new List<Vector3>();
+    private int patrolIdx;
     protected override void Awake()
     {
+        slide = GameObject.FindGameObjectWithTag("MonsterInfoUI").GetComponent<MonsterHPBarSlide>();
+        data = GetComponent<SpiderData>();
+
         base.Awake();
 
         stateMachine = new StateMachine<State, Spider>(this);
@@ -41,14 +49,13 @@ public class Spider : Monster
 
         agent = GetComponent<NavMeshAgent>();
         // 패트롤 위치들
-        //patrolPoints.Add(new Vector3(0, 0, 1));
-        //patrolPoints.Add(new Vector3(3, 0, 0));
-        //patrolPoints.Add(new Vector3(0, 0, 3));
+        patrolPoints.Add(transform.position + new Vector3(8, 0, 4));
+        patrolPoints.Add(transform.position + new Vector3(5, 0, 0));
+        patrolPoints.Add(transform.position + new Vector3(0, 0, 5));
+        target = GameObject.FindGameObjectWithTag("Player").transform;
     }
     private void Start()
     {
-        target = GameObject.FindGameObjectWithTag("Player").transform;
-
         stateMachine.SetUP(State.Idle);
     }
     private void Update()
@@ -57,9 +64,51 @@ public class Spider : Monster
     }
     protected override void Die()
     {
-        stateMachine.ChangeState(State.Die);
+        StopAllCoroutines();
+        base.Die();
     }
+    public void TakeHit(int damage)
+    {
+        slide.SetData(data);
+        if (CalDamage(damage) > 0)
+        {
+            data.CurHP -= CalDamage(damage);
+            if(data.CurHP <= 0)
+            {
+                stateMachine.ChangeState(State.Die);
+            }
+            else
+            {
+                stateMachine.ChangeState(State.Damage);
+            }
+            
+        }
 
+    }
+    private int CalDamage(int damage)
+    {
+        if ((damage- data.CurDEF) < 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return damage - data.CurDEF;
+        }
+    }
+    private float DistanceToTarget()
+    {
+        return Vector3.Distance(target.position, transform.position);
+    }
+    private float DistanceToTarget(Vector3 target)
+    {
+        return Vector3.Distance(target, transform.position);
+    }
+    public bool IsInNear()
+    {
+        bool temp = (DistanceToTarget() <= data.DetectRange);
+        return temp;
+    }
 
     #region State 시작
     private abstract class SpiderState : StateBase<State, Spider>
@@ -88,27 +137,30 @@ public class Spider : Monster
 
         public override void Enter()
         {
-            animator.SetBool("Idle", true);
-            
+            //animator.SetTrigger("Idle");
+            Debug.Log("State Idle");
         }
 
         public override void Exit()
         {
-            animator.SetBool("Idle", false);
         }
 
         public override void Setup()
         {
             target = owner.target;
-            detectRange = owner.detectRange;
+            detectRange = owner.data.DetectRange;
         }
 
         public override void Transition()
         {
-            if((target.position - tranform.position).sqrMagnitude < detectRange)
+            if(owner.IsInNear())
             {
                 stateMachine.ChangeState(State.Trace);
             }
+            else
+            {
+                stateMachine.ChangeState(State.Patrol);
+            }   
         }
 
         public override void Update()
@@ -128,43 +180,38 @@ public class Spider : Monster
 
         public override void Enter()
         {
-            //owner.patrolIdx = 0;
-            //PatrolCoroutine = owner.StartCoroutine(PatrolMove());
+            Debug.Log("State Patrol");
+            animator.SetBool("Move", true);
+            owner.patrolIdx = 1;
+            owner.agent.SetDestination(owner.patrolPoints[owner.patrolIdx]);
+            owner.patrolRoutine = owner.StartCoroutine(owner.PatrolRoutine());
         }
 
 
         public override void Exit()
         {
-
+            owner.StopCoroutine(owner.patrolRoutine);
+            animator.SetBool("Move", false);
         }
 
         public override void Setup()
         {
             target = owner.target;
-            detectRange = owner.detectRange;
+            detectRange = owner.data.DetectRange;
         }
 
         public override void Transition()
         {
-
+            if (owner.IsInNear())
+            {
+                stateMachine.ChangeState(State.Trace);
+            }
         }
 
         public override void Update()
         {
             
         }
-        //Coroutine PatrolCoroutine;
-
-        //IEnumerator PatrolMove()
-        //{
-        //    while (true)
-        //    {
-        //        owner.agent.destination = owner.patrolPoints[owner.patrolIdx];
-
-
-        //        yield return new WaitForSeconds(0.2f);
-        //    }
-        //}
     }
     
     // 추적함
@@ -185,7 +232,8 @@ public class Spider : Monster
 
         public override void Enter()
         {
-            animator.SetBool("Trace", true);
+            Debug.Log("State Trace");
+            animator.SetBool("Move", true);
             lookroutine =  owner.StartCoroutine(owner.LookAtRoutine());
             tracingroutine =  owner.StartCoroutine(owner.TraceRoutine());
         }
@@ -194,24 +242,24 @@ public class Spider : Monster
         {
             owner.StopCoroutine(lookroutine);
             owner.StopCoroutine(tracingroutine);
-            animator.SetBool("Trace", false);
+            animator.SetBool("Move", false);
         }
 
         public override void Setup()
         {
             target = owner.target;
-            speed = owner.moveSpeed;
-            detectRange = owner.detectRange;
-            attackRange = owner.attackRange;
+            speed = owner.data.MoveSpeed;
+            detectRange = owner.data.DetectRange;
+            attackRange = owner.data.AttackRange;
         }
 
         public override void Transition()
         {
-            if ((target.position - tranform.position).sqrMagnitude > detectRange + Mathf.Sqrt(detectRange)*2f)
+            if (owner.DistanceToTarget(owner.patrolPoints[0]) > 15f)
             {
                 stateMachine.ChangeState(State.Returning);
             }
-            else if ((target.position - tranform.position).sqrMagnitude < attackRange)
+            else if (owner.DistanceToTarget() < attackRange /*&& owner.data.AttackMoveDelay == owner.data.AttackMoveCool*/) 
             {
                 stateMachine.ChangeState(State.Attack);
             }
@@ -226,6 +274,8 @@ public class Spider : Monster
     // idle(페트롤[0]) 위치로 돌아감
     private class ReturningState : SpiderState
     {
+        private Transform target;
+
         public ReturningState(Spider owner, StateMachine<State, Spider> stateMachine) : base(owner, stateMachine)
         {
 
@@ -233,10 +283,15 @@ public class Spider : Monster
 
         public override void Enter()
         {
+            Debug.Log("Return State");
+            animator.SetBool("Move", true);
+            owner.returnRoutine = owner.StartCoroutine(owner.ReturnRoutine());
         }
 
         public override void Exit()
         {
+            owner.StopCoroutine(owner.returnRoutine);
+            animator.SetBool("Move", false);
         }
 
         public override void Setup()
@@ -245,6 +300,10 @@ public class Spider : Monster
 
         public override void Transition()
         {
+            if(owner.DistanceToTarget(owner.patrolPoints[0]) < 1f)
+            {
+                stateMachine.ChangeState(State.Idle);
+            }
         }
 
         public override void Update()
@@ -254,6 +313,8 @@ public class Spider : Monster
     // 공격함
     private class AttackState : SpiderState
     {
+        Coroutine atkRoutine;
+
         public AttackState(Spider owner, StateMachine<State, Spider> stateMachine) : base(owner, stateMachine)
         {
 
@@ -261,10 +322,14 @@ public class Spider : Monster
 
         public override void Enter()
         {
+            Debug.Log("State Attack");
+            animator.SetTrigger("Bite");
+            atkRoutine = owner.StartCoroutine(owner.AttackRoutine());
         }
 
         public override void Exit()
         {
+            owner.StopCoroutine(atkRoutine);
         }
 
         public override void Setup()
@@ -273,6 +338,14 @@ public class Spider : Monster
 
         public override void Transition()
         {
+            if (owner.data.AttackMoveDelay <= 0 )
+            {
+                stateMachine.ChangeState(State.Trace);
+            }
+            if(owner.DistanceToTarget() >= owner.data.AttackRange)
+            {
+                stateMachine.ChangeState(State.Trace);
+            }
         }
 
         public override void Update()
@@ -289,6 +362,8 @@ public class Spider : Monster
 
         public override void Enter()
         {
+            Debug.Log("State Damage");
+            animator.SetTrigger("Damage");
         }
 
         public override void Exit()
@@ -301,8 +376,12 @@ public class Spider : Monster
 
         public override void Transition()
         {
+            if(owner.data.CurHP <= 0)
+            {
+                stateMachine.ChangeState(State.Die);
+            }
+            stateMachine.ChangeState(State.Idle);
         }
-
         public override void Update()
         {
         }
@@ -317,6 +396,10 @@ public class Spider : Monster
 
         public override void Enter()
         {
+            Debug.Log("State Die");
+            owner.animator.SetTrigger("StartDie");
+            
+            owner.Die();
         }
 
         public override void Exit()
@@ -335,6 +418,8 @@ public class Spider : Monster
         {
         }
     }
+    #endregion State 끝
+
     IEnumerator LookAtRoutine()
     {
         while (true)
@@ -348,10 +433,74 @@ public class Spider : Monster
     {
         while (true)
         {
-            transform.Translate(moveDir * Time.deltaTime * moveSpeed);
+            if (!animator.GetBool("Die"))
+            {
+                transform.Translate(moveDir * Time.deltaTime * data.MoveSpeed);
+            }
+            yield return null;
+        }
+    }
+    IEnumerator ReturnRoutine()
+    {
+        while (true)
+        {
+            agent.destination = patrolPoints[0];
+            yield return null;
+        }
+    }
+    IEnumerator PatrolRoutine()
+    {
+        while (true)
+        {
+            if (DistanceToTarget(patrolPoints[patrolIdx]) < 1f)
+            {
+                patrolIdx++;
+                patrolIdx %= patrolPoints.Count;
+                agent.destination = patrolPoints[patrolIdx];
+                yield return new WaitForSeconds(0.2f);
+            }
             yield return null;
         }
     }
 
-    #endregion State 끝
+    IEnumerator AttackRoutine()
+    {
+        while (true)
+        {
+            if (data.IsAttack && data.AttackMoveDelay > 0)
+            {
+                if (data.AttackMoveDelay == data.AttackMoveCool)
+                {
+                    //StopCoroutine(traceRoutine);
+                }
+                data.AttackMoveDelay -= Time.deltaTime;
+                if (data.AttackMoveDelay <= 0)
+                {
+                    data.AttackMoveDelay = data.AttackMoveCool;
+                    data.IsAttack = false;
+                    yield return new WaitForSeconds(1f);
+                    //traceRoutine = StartCoroutine(TraceRoutine());
+                }
+            }
+
+            yield return new WaitForSeconds(0.2f);
+        }
+    }
+
+    protected override void Attack()
+    {
+        
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        IHittable hittable = other.GetComponent<IHittable>();
+        hittable?.TakeHit(data.CurATK);
+        data.IsAttack = true;
+    }
+    private void OnTriggerStay(Collider other)
+    {
+        IHittable hittable = other.GetComponent<IHittable>();
+        hittable?.TakeHit(data.CurATK);
+        data.IsAttack = true;
+    }
 }
