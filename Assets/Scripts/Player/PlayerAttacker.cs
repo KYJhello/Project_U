@@ -16,7 +16,7 @@ public class PlayerAttacker : MonoBehaviour
     [SerializeField] LayerMask targetMask;
     [SerializeField] LayerMask obstacleMask;
 
-    [SerializeField] TrailRenderer bulletTrail;
+    //[SerializeField] TrailRenderer bulletTrail;
     private float cosResult;
 
 
@@ -50,17 +50,27 @@ public class PlayerAttacker : MonoBehaviour
                     hittable?.TakeHit(data.CurATK + curWeapon.Damage);
                 }
             }
-
         }
         // 2. Angle이 1인 총기의 경우 레이케스트 사용
         else if (curWeapon.Angle == 1)
         {
+            data.Anim.SetTrigger("Fire");
             RaycastHit hit;
             if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, curWeapon.Range))
             {
                 IHittable target = hit.transform.GetComponent<IHittable>();
                 target?.TakeHit(data.CurATK + curWeapon.Damage);
 
+                TrailRenderer trail = GameManager.Resource.Instantiate<TrailRenderer>("Effect/BulletTrail", curWeapon.transform.position, Quaternion.identity, true);
+                trail.Clear();
+                float totalTime = Vector2.Distance(curWeapon.transform.position, hit.point) / 10f;
+                float rate = 0;
+                while (rate < 1)
+                {
+                    trail.transform.position = Vector3.Lerp(curWeapon.transform.position, hit.point, rate);
+                    rate += Time.deltaTime / totalTime;
+                }
+                GameManager.Resource.Destroy(trail.gameObject, 3f);
             }
         }
         // 3. 샷건용
@@ -84,7 +94,7 @@ public class PlayerAttacker : MonoBehaviour
 
                     if (hittable != null)
                     {
-                        TrailRenderer trail = GameManager.Instantiate(bulletTrail, curWeapon.transform);
+                        TrailRenderer trail = GameManager.Resource.Instantiate<TrailRenderer>("Effect/BulletTrail", curWeapon.transform.position, Quaternion.identity, true);
                         trail.Clear();
                         float totalTime = Vector2.Distance(curWeapon.transform.position, collider.transform.position) / 10f;
                         float rate = 0;
@@ -93,6 +103,7 @@ public class PlayerAttacker : MonoBehaviour
                             trail.transform.position = Vector3.Lerp(curWeapon.transform.position, collider.transform.position, rate);
                             rate += Time.deltaTime / totalTime;
                         }
+                        GameManager.Resource.Destroy(trail.gameObject, 3f);
                     }
                 }
             }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,6 +14,8 @@ public class ThirdCamController : MonoBehaviour
     private Vector2 lookDelta;
     private float xRotation;
     private float yRotation;
+
+    private bool isSit = false;
 
     public void OnEnable()
     {
@@ -36,10 +39,22 @@ public class ThirdCamController : MonoBehaviour
         // 보고있는 물체의 위치
         Vector3 lookPoint = Camera.main.transform.position + Camera.main.transform.forward * lookDistance;
         aimTarget.position = lookPoint;
-        // 보고있는 방향의 수직값은 현재의 수직값
+        // 보고있는 방향의 수직값은 현재의 수직값 
         lookPoint.y = transform.position.y;
         // 룩포인트 보기
         transform.LookAt(lookPoint);
+    }
+    public void IsSit(bool isSit)
+    {
+        this.isSit = isSit;
+        if (isSit)
+        {
+            cameraRoot.Translate(Vector3.down * 20f * Time.deltaTime);
+        }
+        else
+        {
+            cameraRoot.Translate(Vector3.up * 20f * Time.deltaTime);
+        }
     }
     private void Look()
     {

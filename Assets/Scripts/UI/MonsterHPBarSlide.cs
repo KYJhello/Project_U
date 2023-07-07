@@ -46,7 +46,7 @@ public class MonsterHPBarSlide : MonoBehaviour, IBarUI
         SetEnable(true);
         myData = data;
     }
-    private void SetEnable(bool state)
+    public void SetEnable(bool state)
     {
         slider.enabled = state;
         foreach (var item in infoText)

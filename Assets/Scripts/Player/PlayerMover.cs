@@ -8,6 +8,7 @@ public class PlayerMover : MonoBehaviour
 {
     private PlayerData data;
     private CharacterController controller;
+    private ThirdCamController camera;
     private Vector3 moveDir;
     public Vector3 MoveDir { get; private set; }
     private float zSpeed = 0; // À§ ¾Æ·¡
@@ -24,6 +25,7 @@ public class PlayerMover : MonoBehaviour
     {
         data = GetComponent<PlayerData>();
         controller = GetComponent<CharacterController>();
+        camera = GetComponent<ThirdCamController>();
     }
 
     private void Update()
@@ -111,6 +113,8 @@ public class PlayerMover : MonoBehaviour
     {
         if (isSit) { isSit = false; }
         else { isSit = true; }
+
+        camera.IsSit(isSit);
 
         data.Anim.SetBool("Sit", isSit);
     }

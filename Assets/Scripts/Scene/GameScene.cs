@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class GameScene : BaseScene
 {
-    private Canvas gameMenuCanvas;
+    //private Canvas gameMenuCanvas;
     protected override IEnumerator LoadingRoutine()
     {
         progress = 0.0f;
@@ -15,9 +15,9 @@ public class GameScene : BaseScene
 
     public void OnMenuButton()
     {
-        if (gameMenuCanvas == null) {
-            gameMenuCanvas = GameManager.Resource.Instantiate<Canvas>("UI/GameMenuCanvas");
-        }
+        //if (gameMenuCanvas == null) {
+        //    gameMenuCanvas = GameManager.Resource.Instantiate<Canvas>("UI/GameMenuCanvas");
+        //}
     }
     public void GamePause()
     {

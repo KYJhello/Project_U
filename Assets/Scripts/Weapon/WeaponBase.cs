@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum WeaponType { Gun = 0, Knife, Granade}
 
 // 무기 정보만 넣기!!!
 public class WeaponBase : MonoBehaviour

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour, IHittable
+public class PlayerController : MonoBehaviour, IHittable, IHealable
 {
     private int curDamage;
 
@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour, IHittable
     private PlayerMover mover;
     private PlayerAttacker attacker;
     private PlayerInteractor interactor;
+    private PlayerInventory inventory;
     private ThirdCamController camController;
 
     public UnityEvent<int> OnHit;
@@ -32,6 +33,7 @@ public class PlayerController : MonoBehaviour, IHittable
         mover = GetComponent<PlayerMover>();
         attacker = GetComponent<PlayerAttacker>();
         interactor = GetComponent<PlayerInteractor>();
+        inventory = GetComponent<PlayerInventory>();
         camController = GetComponent<ThirdCamController>();
 
         data.hitDelay = data.hitCool;
@@ -44,7 +46,10 @@ public class PlayerController : MonoBehaviour, IHittable
     {
         StopCoroutine(hitRoutine);
     }
-
+    public void Heal(int heal)
+    {
+        data.CurHP = (data.CurHP + heal >= data.MaxHP) ? (data.MaxHP) : (data.CurHP + heal);
+    }
 
     private bool IsDie()
     {
