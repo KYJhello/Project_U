@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 282027030}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.348, y: 0.973, z: 0.297}
+  m_LocalPosition: {x: -0.2, y: 0.8, z: 0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -86,7 +86,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 390604353}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.007, y: -0.004, z: 0.199}
+  m_LocalPosition: {x: 0.005, y: -0.051, z: 0.222}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -142,7 +142,7 @@ MonoBehaviour:
   m_Data:
     m_Root: {fileID: 6964039207231166943}
     m_Mid: {fileID: 5054238967169840349}
-    m_Tip: {fileID: 2406332589328715564}
+    m_Tip: {fileID: 8006395201458497521}
     m_Target: {fileID: 390604354}
     m_Hint: {fileID: 282027031}
     m_TargetPositionWeight: 1
@@ -194,9 +194,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3c430f382484144e925c097c2d33cfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 1
+  m_Weight: 0.64
   m_Data:
-    m_ConstrainedObject: {fileID: 2184889651997812944}
+    m_ConstrainedObject: {fileID: 2843246104260842856}
     m_SourceObjects:
       m_Length: 1
       m_Item0:
@@ -223,11 +223,11 @@ MonoBehaviour:
       m_Item7:
         transform: {fileID: 0}
         weight: 0
-    m_Offset: {x: -40, y: 0, z: 0}
+    m_Offset: {x: 0, y: 0, z: 0}
     m_MinLimit: -90
     m_MaxLimit: 90
-    m_AimAxis: 2
-    m_UpAxis: 1
+    m_AimAxis: 4
+    m_UpAxis: 2
     m_WorldUpType: 0
     m_WorldUpObject: {fileID: 0}
     m_WorldUpAxis: 2
@@ -301,7 +301,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2060934724
 Transform:
   m_ObjectHideFlags: 0
@@ -336,7 +336,7 @@ MonoBehaviour:
       m_Length: 1
       m_Item0:
         transform: {fileID: 0}
-        weight: 0.1
+        weight: 1
       m_Item1:
         transform: {fileID: 0}
         weight: 0
@@ -358,7 +358,7 @@ MonoBehaviour:
       m_Item7:
         transform: {fileID: 0}
         weight: 0
-    m_Offset: {x: -10, y: 0, z: -10}
+    m_Offset: {x: 0, y: -90, z: -40}
     m_MinLimit: -90
     m_MaxLimit: 90
     m_AimAxis: 0
@@ -5388,7 +5388,6 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 256
-  bulletTrail: {fileID: 0}
 --- !u!114 &6717975996162588777
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5435,6 +5434,18 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
         m_MethodName: TakeHit
         m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PlayerHpBarUI, Assembly-CSharp
+        m_MethodName: OnHPChanged
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -6129,7 +6140,7 @@ ParentConstraint:
   m_TranslationAtRest: {x: 0.0558, y: 1.4819, z: 0.0762}
   m_RotationAtRest: {x: 0, y: 0, z: 0}
   m_TranslationOffsets:
-  - {x: 0.05572152, y: 0.07585752, z: 0.09893775}
+  - {x: 0.055721283, y: 0.075858116, z: 0.09893799}
   m_RotationOffsets:
   - {x: -6.829918, y: 0, z: 0}
   m_AffectTranslationX: 1
@@ -6750,7 +6761,7 @@ ParentConstraint:
   m_TranslationAtRest: {x: -0.0558, y: 1.4819, z: 0.0762}
   m_RotationAtRest: {x: 0, y: 0, z: 0}
   m_TranslationOffsets:
-  - {x: -0.05587864, y: 0.07585752, z: 0.09893775}
+  - {x: -0.0558815, y: 0.075858116, z: 0.09893799}
   m_RotationOffsets:
   - {x: -6.829918, y: 0, z: 0}
   m_AffectTranslationX: 1
@@ -11612,7 +11623,7 @@ MonoBehaviour:
   weaponName: p90
   damage: 20
   range: 30
-  angle: 60
+  angle: 1
   maxDistance: 50
 --- !u!64 &6936416030271152825
 MeshCollider:

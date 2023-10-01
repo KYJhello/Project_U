@@ -26,6 +26,10 @@ public class SoundManager : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
+
+    public float VolumeSFX = 1f;
+    public float VolumeBGM = 1f;
+
     public Sound[] effetSounds;
     public Sound[] bgmSounds;
 

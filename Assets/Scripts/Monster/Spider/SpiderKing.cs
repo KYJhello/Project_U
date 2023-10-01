@@ -232,17 +232,13 @@ public class SpiderKing : BossMonster, IHittable
 
         public override void Transition()
         {
-            //if (owner.DistanceToTarget(target.position) < owner.skillRange && !owner.isSkilling)
+
+            //if(owner.DistanceToTarget(target.position) < owner.skillRange &&
+            //    owner.DistanceToTarget(target.position) > owner.data.AttackRange)
             //{
             //    stateMachine.ChangeState(State.ATKSkill);
             //}
-            /*else*/ 
-            if(owner.DistanceToTarget(target.position) < owner.skillRange &&
-                owner.DistanceToTarget(target.position) > owner.data.AttackRange)
-            {
-                stateMachine.ChangeState(State.ATKSkill);
-            }
-            else if (owner.DistanceToTarget(target.position) <= owner.data.AttackRange )
+            /*else */if (owner.DistanceToTarget(target.position) <= owner.data.AttackRange )
             {
                 stateMachine.ChangeState(State.Attack);
             }
