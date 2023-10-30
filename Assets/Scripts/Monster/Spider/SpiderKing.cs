@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.IO.LowLevel.Unsafe;
@@ -232,17 +233,20 @@ public class SpiderKing : BossMonster, IHittable
 
         public override void Transition()
         {
+            float targetD = owner.DistanceToTarget(target.position);
+            float rootD = owner.DistanceToTarget(owner.rootPoint);
 
-            //if(owner.DistanceToTarget(target.position) < owner.skillRange &&
-            //    owner.DistanceToTarget(target.position) > owner.data.AttackRange)
-            //{
-            //    stateMachine.ChangeState(State.ATKSkill);
-            //}
-            /*else */if (owner.DistanceToTarget(target.position) <= owner.data.AttackRange )
+            if (targetD < owner.skillRange &&
+                targetD > owner.data.AttackRange &&
+                owner.data.SkillCool == owner.data.SkillDelay)
+            {
+                stateMachine.ChangeState(State.ATKSkill);
+            }
+            else if (targetD <= owner.data.AttackRange)
             {
                 stateMachine.ChangeState(State.Attack);
             }
-            else if (owner.DistanceToTarget(owner.rootPoint) > owner.data.ReturnDistance)
+            else if (rootD > owner.data.ReturnDistance)
             {
                 stateMachine.ChangeState(State.Returning);
             }
@@ -354,6 +358,7 @@ public class SpiderKing : BossMonster, IHittable
 
         public override void Exit()
         {
+            owner.StopCoroutine(owner.ATKSkillRoutine());
         }
 
         public override void Setup()
@@ -551,6 +556,7 @@ public class SpiderKing : BossMonster, IHittable
         float curTime = 0;
         while (curTime < time)
         {
+
             //if (IsGrounded())
             //{
             //    yield return null;
@@ -558,7 +564,15 @@ public class SpiderKing : BossMonster, IHittable
             curTime += Time.deltaTime;
             ySpeed += Physics.gravity.y * Time.deltaTime;
 
-            transform.position += new Vector3(xSpeed, ySpeed, zSpeed) * Time.deltaTime;
+            if (transform.position.y < 0)
+            {
+                transform.position = new Vector3(transform.position.x, 0.5f, transform.position.z);
+            }
+            else
+            {
+                transform.position += new Vector3(xSpeed, ySpeed, zSpeed) * Time.deltaTime;
+
+            }
 
             yield return null;
         }
@@ -569,4 +583,5 @@ public class SpiderKing : BossMonster, IHittable
         return Physics.SphereCast(transform.position + Vector3.up * 0.5f,
             0.5f, Vector3.down, out hit, 0.6f);
     }
+
 }

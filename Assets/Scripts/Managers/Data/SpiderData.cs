@@ -9,7 +9,7 @@ public class SpiderData : MonsterData
     {
         name = "Spider";        // 이름 
         HP  = 100;                     // 체력
-        maxHP = 500;                  // 최대 체력
+        maxHP = 100;                  // 최대 체력
         ATK = 15;                     // 공격 
         DEF = 10;                      // 방어 
 
