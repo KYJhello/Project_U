@@ -15,7 +15,6 @@ public class PlayerController : MonoBehaviour, IHittable, IHealable
     private PlayerInteractor interactor;
     private PlayerInventory inventory;
     private ThirdCamController camController;
-
     public UnityEvent<int> OnHit;
     
     private Coroutine hitRoutine;

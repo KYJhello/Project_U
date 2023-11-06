@@ -149,6 +149,22 @@ public class SpiderKing : BossMonster, IHittable
             }
         }
     }
+    private void JumpAttack()
+    {
+        Collider[] colliders = Physics.OverlapSphere(transform.position, data.AttackRange, targetMask);
+        IHittable hittable = collider.GetComponent<IHittable>();
+        hittable?.TakeHit(data.CurATK + curSkillDamage);
+
+        if (hittable != null)
+        {
+            float totalTime = Vector2.Distance(transform.position, collider.transform.position) / 10f;
+            float rate = 0;
+            while (rate < 1)
+            {
+                rate += Time.deltaTime / totalTime;
+            }
+        }
+    }
 
 
 
@@ -440,6 +456,7 @@ public class SpiderKing : BossMonster, IHittable
         while (true)
         {
             moveDir = (target.position - transform.position).normalized;
+            moveDir.y = 0f;
             transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(moveDir), 0.1f);
             yield return null;
         }
@@ -556,22 +573,17 @@ public class SpiderKing : BossMonster, IHittable
         float curTime = 0;
         while (curTime < time)
         {
-
-            //if (IsGrounded())
-            //{
-            //    yield return null;
-            //}
             curTime += Time.deltaTime;
             ySpeed += Physics.gravity.y * Time.deltaTime;
 
-            if (transform.position.y < 0)
+            if (transform.position.y <= 0)
             {
                 transform.position = new Vector3(transform.position.x, 0.5f, transform.position.z);
             }
             else
             {
                 transform.position += new Vector3(xSpeed, ySpeed, zSpeed) * Time.deltaTime;
-
+                
             }
 
             yield return null;
