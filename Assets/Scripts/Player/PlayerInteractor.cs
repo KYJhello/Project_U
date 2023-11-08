@@ -10,6 +10,7 @@ public class PlayerInteractor : MonoBehaviour
     [SerializeField] Transform point;
     [SerializeField] float interactRange;
 
+
     public void Interact()
     {
         Collider[] colliders = Physics.OverlapSphere(point.position, interactRange);

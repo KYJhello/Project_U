@@ -6,18 +6,21 @@ using UnityEngine.UI;
 
 public class InventoryUI : BaseUI
 {
-    InventoryData data;
+    [SerializeField]
+    PlayerInventory playerInventory;
+    //InventoryData data;
 
     private void Awake()
     {
         base.Awake();
-        data = GetComponent<InventoryData>();
+        //data = GetComponent<InventoryData>();
     }
 
     public override void OnEnable()
     {
         base.OnEnable();
         gameObject.SetActive(true);
+        ShowItems();
     }
     public override void OnDisable()
     {
@@ -27,11 +30,11 @@ public class InventoryUI : BaseUI
     private void ShowItems()
     {
         int index = 0;
-        foreach(ItemData item in data.ItemDatas)
+        foreach(Item item in playerInventory.items)
         {
             if(item != null)
             {
-                images["ItemSlot" + index].sprite = item.GetSprite;
+                images["ItemSlot (" + index + ")"].sprite = item.data.GetSprite;
             }
         }
     }

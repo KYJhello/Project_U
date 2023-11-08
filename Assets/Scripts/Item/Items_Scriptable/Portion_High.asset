@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82df6e3421fbc1640b216456002f8c15, type: 3}
   m_Name: Portion_High
   m_EditorClassIdentifier: 
-  Type: 3
+  Type: 2
   id: 3
   maxAmount: 99
   name: HighPortion
   tooltip: +200hp
-  iconSprite: {fileID: 0}
-  dropItemPrefab: {fileID: 0}
+  iconSprite: {fileID: 21300000, guid: 1b80b632d9e32bb448ce0bebed2208d4, type: 3}
+  dropItemPrefab: {fileID: 1029301884381818, guid: 4a304209bbfe02249bd92db44aa22f94, type: 3}

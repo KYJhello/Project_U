@@ -6,13 +6,13 @@ public class ContentArea : MonoBehaviour
 {
     InventoryUI inven;
     SoundUI sound;
-    MapUI map;
+    //MapUI map;
 
     private void Awake()
     {
         inven = GetComponentInChildren<InventoryUI>();
         sound = GetComponentInChildren<SoundUI>();
-        map = GetComponentInChildren<MapUI>();
+        //map = GetComponentInChildren<MapUI>();
     }
     private void Start()
     {
@@ -26,17 +26,17 @@ public class ContentArea : MonoBehaviour
             case 0:
                 inven.OnEnable();
                 sound.OnDisable();
-                map.OnDisable();
+                //map.OnDisable();
                 break;
             case 1:
                 inven.OnDisable();
                 sound.OnEnable();
-                map.OnDisable();
+                //map.OnDisable();
                 break;
             case 2:
                 inven.OnDisable();
                 sound.OnDisable();
-                map.OnEnable();
+                //map.OnEnable();
                 break;
         }
     }
@@ -44,12 +44,12 @@ public class ContentArea : MonoBehaviour
     {
         inven.OnEnable();
         sound.OnEnable();
-        map.OnEnable();
+        //map.OnEnable();
     }
     public void AreaDisable()
     {
         inven.OnDisable();
         sound.OnDisable();
-        map.OnDisable();
+        //map.OnDisable();
     }
 }

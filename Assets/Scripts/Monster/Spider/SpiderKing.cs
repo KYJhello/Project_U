@@ -151,19 +151,9 @@ public class SpiderKing : BossMonster, IHittable
     }
     private void JumpAttack()
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, data.AttackRange, targetMask);
-        IHittable hittable = collider.GetComponent<IHittable>();
-        hittable?.TakeHit(data.CurATK + curSkillDamage);
+        jumpAttackRoutine = StartCoroutine(JumpAttackRoutine());
 
-        if (hittable != null)
-        {
-            float totalTime = Vector2.Distance(transform.position, collider.transform.position) / 10f;
-            float rate = 0;
-            while (rate < 1)
-            {
-                rate += Time.deltaTime / totalTime;
-            }
-        }
+
     }
 
 
@@ -367,14 +357,13 @@ public class SpiderKing : BossMonster, IHittable
         {
             Debug.Log("SkillState");
             owner.isSkilling = true;
-            owner.data.SkillDelay = owner.data.SkillCool;
-            if(owner.skillRoutine != null) { owner.StopCoroutine(owner.skillRoutine); }
-            owner.skillRoutine = owner.StartCoroutine(owner.ATKSkillRoutine());
+            //if(owner.skillRoutine != null) { owner.StopCoroutine(owner.skillRoutine); }
+            owner.ATKSkill();
         }
 
         public override void Exit()
         {
-            owner.StopCoroutine(owner.ATKSkillRoutine());
+            owner.data.SkillDelay = owner.data.SkillCool;
         }
 
         public override void Setup()
@@ -383,10 +372,15 @@ public class SpiderKing : BossMonster, IHittable
 
         public override void Transition()
         {
+            if(owner.data.SkillDelay <= 0)
+            {
+                stateMachine.ChangeState(State.Trace);
+            }
         }
 
         public override void Update()
         {
+            owner.data.SkillDelay -= Time.deltaTime;
         }
     }
 
@@ -412,7 +406,10 @@ public class SpiderKing : BossMonster, IHittable
 
         public override void Transition()
         {
-            stateMachine.ChangeState(State.Trace);
+            if(owner.data.SkillDelay == owner.data.SkillCool && !owner.isSkilling)
+            {
+                stateMachine.ChangeState(State.Trace);
+            }
         }
 
         public override void Update()
@@ -522,78 +519,88 @@ public class SpiderKing : BossMonster, IHittable
     }
 
 
-    IEnumerator ATKSkillRoutine()
+    private void ATKSkill()
     {
-        while (true)
+        int skillIDX = UnityEngine.Random.Range(0, 2);
+        switch (skillIDX)
         {
-            if (IsGrounded())
-            {
-                if (data.SkillCool == data.SkillDelay)
-                {
-                    if (jumpAttackRoutine != null)
-                    {
-                        StopCoroutine(jumpAttackRoutine);
-                    }
-                    else
-                    {
-                        jumpAttackRoutine = StartCoroutine(JumpAttackRoutine());
-                    }
-                    yield return new WaitForSeconds(time);
-                    StopCoroutine(jumpAttackRoutine);
-                }
-            }
-            data.SkillDelay -= Time.deltaTime;
-
-            if (data.SkillDelay <= 0)
-            {
-                //int skillIDX = Random.Range(0, 3);
-                //switch(skillIDX)
-                //{
-                //    case (int)AttackSkill.Jump:
-                //        JumpAttack();
-                //        break;
-                //    case (int)AttackSkill.Web_Shoot:
-                //        break;
-                //    case (int)AttackSkill.Web_Cone:
-                //        break;
-                //}
-                isSkilling = false;
-                stateMachine.ChangeState(State.Trace);
-            }
-            yield return null;
+            case (int)AttackSkill.Jump:
+                JumpAttack();
+                break;
+            case (int)AttackSkill.Web_Shoot:
+                StartCoroutine(ShootAttackRoutine());
+                break;
         }
     }
     #endregion
     IEnumerator JumpAttackRoutine()
     {
-        float xSpeed = (target.position.x - transform.position.x) / time;
-        float zSpeed = (target.position.z - transform.position.z) / time;
-        float ySpeed = -1 * (0.5f * Physics.gravity.y * time * time + transform.position.y) / time;
-
+        Debug.Log("jumpattack");
+        //float xSpeed = (target.position.x - transform.position.x) / time;
+        //float zSpeed = (target.position.z - transform.position.z) / time;
+        //float ySpeed = -1 * (0.5f * Physics.gravity.y * time * time + transform.position.y) / time;
+        Vector3 p0 = transform.position;
+        Vector3 p1 = ((target.position + transform.position) / 2) + Vector3.up * 5f;
+        Vector3 p2 = target.position;
         float curTime = 0;
         while (curTime < time)
         {
-            curTime += Time.deltaTime;
-            ySpeed += Physics.gravity.y * Time.deltaTime;
+            curTime += Time.deltaTime/2;
+            //ySpeed += Physics.gravity.y * Time.deltaTime;
 
             if (transform.position.y <= 0)
             {
                 transform.position = new Vector3(transform.position.x, 0.5f, transform.position.z);
+                yield return new WaitForSeconds(2f);
+                isSkilling = false;
+                stateMachine.ChangeState(State.Trace);
+
             }
             else
             {
-                transform.position += new Vector3(xSpeed, ySpeed, zSpeed) * Time.deltaTime;
-                
+                Vector3 p3 = Vector3.Lerp(p0, p1, curTime);
+                Vector3 p4 = Vector3.Lerp(p1, p2, curTime);
+
+                transform.position = Vector3.Lerp(p3, p4, curTime);
+                transform.LookAt(p2);
+                //transform.position += new Vector3(xSpeed, ySpeed, zSpeed) * Time.deltaTime;
+            }
+            Collider[] colliders = Physics.OverlapSphere(transform.position, data.AttackRange, targetMask);
+            foreach(Collider col in colliders)
+            {
+                IHittable hittable = col.GetComponent<IHittable>();
+                hittable?.TakeHit(data.CurATK + curSkillDamage);
+
+                if (hittable != null)
+                {
+                    float totalTime = Vector2.Distance(transform.position, collider.transform.position) / 10f;
+                    float rate = 0;
+                    while (rate < 1)
+                    {
+                        rate += Time.deltaTime / totalTime;
+                    }
+                }
             }
 
+            
             yield return null;
         }
+        isSkilling = false;
+        StopCoroutine(jumpAttackRoutine);
     }
-    private bool IsGrounded()
+    //private bool IsGrounded()
+    //{
+    //    RaycastHit hit;
+    //    return Physics.SphereCast(transform.position + Vector3.up * 0.5f,
+    //        0.5f, Vector3.down, out hit, 0.6f);
+    //}
+    IEnumerator ShootAttackRoutine()
     {
-        RaycastHit hit;
-        return Physics.SphereCast(transform.position + Vector3.up * 0.5f,
-            0.5f, Vector3.down, out hit, 0.6f);
+        Debug.Log("shootattack");
+        GameManager.Resource.Instantiate<CurveAttack>("Monster/AttackBall", transform.position + Vector3.forward + Vector3.up, transform.rotation, true).SetDamage(data.CurATK);
+        isSkilling = false;
+        yield return new WaitForSeconds(2f);
+        stateMachine.ChangeState(State.Trace);
     }
 
 }
