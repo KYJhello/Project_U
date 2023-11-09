@@ -20,23 +20,27 @@ public class InventoryUI : BaseUI
     {
         base.OnEnable();
         gameObject.SetActive(true);
-        ShowItems();
+        //ShowItems();
     }
     public override void OnDisable()
     {
         base.OnDisable();
         gameObject.SetActive(false);
     }
-    private void ShowItems()
+    public void ShowItems()
     {
-        int index = 0;
-        foreach(Item item in playerInventory.items)
+        //int index = 0;
+        for(int i = 0; i< playerInventory.items.Count; i++)
         {
-            if(item != null)
-            {
-                images["ItemSlot (" + index + ")"].sprite = item.data.GetSprite;
-            }
+            images["ItemSlot (" + i + ")"].sprite = playerInventory.items[i].data.GetSprite;
         }
+        //foreach(Item item in playerInventory.items)
+        //{
+        //    if(item != null)
+        //    {
+        //        images["ItemSlot (" + index + ")"].sprite = item.data.GetSprite;
+        //    }
+        //}
     }
     
 }

@@ -15,6 +15,7 @@ public class Inventory : MonoBehaviour
     {
         items.Add(item);
     }
+
     public void RemoveItem(Item item)
     {
         items.Remove(item);
