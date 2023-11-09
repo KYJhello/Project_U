@@ -209,6 +209,8 @@ public class SpiderKing : BossMonster, IHittable
     }
     private class TraceState : SpiderKingState
     {
+        float minTraceTime = 1.5f;
+        float curTraceTime;
         public TraceState(SpiderKing owner, StateMachine<State, SpiderKing> stateMachine) : base(owner, stateMachine)
         {
 
@@ -216,6 +218,7 @@ public class SpiderKing : BossMonster, IHittable
 
         public override void Enter()
         {
+            curTraceTime = 0;
             Debug.Log("StateTrace");
             owner.lookAtRoutine = owner.StartCoroutine(owner.LookAtRoutine());
             owner.traceRoutine = owner.StartCoroutine(owner.TraceRoutine());
@@ -239,9 +242,14 @@ public class SpiderKing : BossMonster, IHittable
 
         public override void Transition()
         {
+            if(curTraceTime < minTraceTime)
+            {
+                return;
+            }
+            
             float targetD = owner.DistanceToTarget(target.position);
             float rootD = owner.DistanceToTarget(owner.rootPoint);
-
+            
             if (targetD < owner.skillRange &&
                 targetD > owner.data.AttackRange &&
                 owner.data.SkillCool == owner.data.SkillDelay)
@@ -261,8 +269,10 @@ public class SpiderKing : BossMonster, IHittable
 
         public override void Update()
         {
-
+            curTraceTime += Time.deltaTime;
         }
+
+        
     }
     private class ReturningState : SpiderKingState
     {

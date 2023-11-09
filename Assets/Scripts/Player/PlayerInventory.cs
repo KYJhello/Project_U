@@ -4,10 +4,5 @@ using UnityEngine;
 
 public class PlayerInventory : Inventory
 {
-    public PortionItem por;
 
-    private void Start()
-    {
-        items.Add(por);
-    }
 }
