@@ -6,34 +6,41 @@ using UnityEngine.UI;
 
 public class InventoryUI : BaseUI
 {
-    InventoryData data;
+    [SerializeField]
+    PlayerInventory playerInventory;
+    //InventoryData data;
 
     private void Awake()
     {
         base.Awake();
-        data = GetComponent<InventoryData>();
+        //data = GetComponent<InventoryData>();
     }
 
     public override void OnEnable()
     {
         base.OnEnable();
         gameObject.SetActive(true);
+        //ShowItems();
     }
     public override void OnDisable()
     {
         base.OnDisable();
         gameObject.SetActive(false);
     }
-    private void ShowItems()
+    public void ShowItems()
     {
-        int index = 0;
-        foreach(ItemData item in data.ItemDatas)
+        //int index = 0;
+        for(int i = 0; i< playerInventory.items.Count; i++)
         {
-            if(item != null)
-            {
-                images["ItemSlot" + index].sprite = item.GetSprite;
-            }
+            images["ItemSlot (" + i + ")"].sprite = playerInventory.items[i].data.GetSprite;
         }
+        //foreach(Item item in playerInventory.items)
+        //{
+        //    if(item != null)
+        //    {
+        //        images["ItemSlot (" + index + ")"].sprite = item.data.GetSprite;
+        //    }
+        //}
     }
     
 }

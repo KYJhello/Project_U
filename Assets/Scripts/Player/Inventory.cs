@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
-    List<Item> items;
+    public List<Item> items;
 
     private void Awake()
     {
@@ -15,6 +15,7 @@ public class Inventory : MonoBehaviour
     {
         items.Add(item);
     }
+
     public void RemoveItem(Item item)
     {
         items.Remove(item);

@@ -30,6 +30,10 @@ public class PlayerMover : MonoBehaviour
 
     private void Update()
     {
+        if (gameObject.transform.position.y < 0)
+        {
+            gameObject.transform.position = new Vector3(transform.position.x,0,transform.position.z);
+        }
         Move();
         Jump();
     }
@@ -45,19 +49,19 @@ public class PlayerMover : MonoBehaviour
         // 안움직임
         if (moveDir.magnitude == 0)  // 안움직임
         {
-            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, 0, 0.5f); // 선형 보간
+            data.MoveSpeed = 0; 
         }
         else if (isSit)      // 앉음
         {
-            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.CrouchSpeed, 0.5f);
+            data.MoveSpeed = data.CrouchSpeed; 
         }
         else if (isRun)       // 뜀  
         {
-            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.RunSpeed, 0.5f);
+            data.MoveSpeed = data.RunSpeed; 
         }
         else                   // 걸음     
         {
-            data.MoveSpeed = Mathf.Lerp(data.MoveSpeed, data.WalkSpeed, 0.5f);
+            data.MoveSpeed = data.WalkSpeed; 
         }
         if (data.isRoll || (data.isHit && data.hitDelay >= 0.5f))
         {

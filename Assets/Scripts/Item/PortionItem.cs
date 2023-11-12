@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class PortionItem : CountableItem
 {
-    public PortionItem(CountableItemData data, int amount = 1) : base(data, amount)
+    GameObject player;
+
+    private void OnEnable()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 
-    protected override CountableItem Clone(int amount)
+    public void ReturnItem()
     {
-        return new PortionItem(CountableData as PortionItemData, amount);
+        player.GetComponent<PlayerInventory>().AddItem(this);
+        Destroy(this.gameObject);
     }
 }

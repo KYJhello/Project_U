@@ -10,7 +10,8 @@ public class GameScene : BaseScene
     {
         progress = 0.0f;
         yield return null;
-        progress = 1.0f;
+        progress = 100f;
+
     }
 
     public void OnMenuButton()

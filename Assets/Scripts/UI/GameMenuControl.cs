@@ -25,7 +25,7 @@ public class GameMenuControl : PopUpUI
 
         buttons["Inventory"].onClick.AddListener(() => { contentArea.ActiveControl(0); });
         buttons["Sound"].onClick.AddListener(() => { contentArea.ActiveControl(1); });
-        buttons["Map"].onClick.AddListener(() => { contentArea.ActiveControl(2); });
+        //buttons["Map"].onClick.AddListener(() => { contentArea.ActiveControl(2); });
     }
     private void Start()
     {

@@ -8,8 +8,8 @@ public class SpiderKingData : BossMonsterData
     private void Awake()
     {
         name = "SpiderKing";        // 이름 
-        HP = 5000;                     // 체력
-        maxHP = 5000;                  // 최대 체력
+        HP = 500;                     // 체력
+        maxHP = 500;                  // 최대 체력
         ATK = 30;                     // 공격 
         DEF = 10;                      // 방어 
 
