@@ -57,11 +57,6 @@ public class SceneManager : MonoBehaviour
         if (CurScene != null)
         {
             CurScene.LoadAsync();
-            //while (CurScene.progress < 1f)
-            //{
-            //    loadingUI.SetProgress(Mathf.Lerp(0.0f, 0.5f, oper.progress));
-            //    yield return null;
-            //}
         }
 
         loadingUI.SetProgress(100f);
